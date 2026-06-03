@@ -1,0 +1,11 @@
+# Monorepo — per-app rules live in frontend/.gitignore and backend/.gitignore
+
+# IDE (repo root)
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+
+# OS
+.DS_Store
+Thumbs.db

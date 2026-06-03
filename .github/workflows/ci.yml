@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: rms
+          POSTGRES_USER: rms
+          POSTGRES_PASSWORD: rms
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rms -d rms"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build backend
+        working-directory: backend
+        run: mvn -B -DskipTests package
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/rms
+          SPRING_DATASOURCE_USERNAME: rms
+          SPRING_DATASOURCE_PASSWORD: rms
+          SERVER_PORT: 8080
+          JWT_SECRET: ci-jwt-secret-minimum-32-characters-long
+          RMS_CORS_ALLOWED_ORIGINS: http://localhost:5173
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install and build
+        working-directory: frontend
+        env:
+          VITE_API_URL: http://localhost:8080
+          VITE_API_PROXY_TARGET: http://localhost:8080
+          VITE_DEV_PORT: 5173
+        run: |
+          npm ci
+          npm run build

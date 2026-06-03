@@ -1,0 +1,45 @@
+{
+  "app": {
+    "name": "Restaurant RMS",
+    "tagline": "Gérez votre restaurant en un seul endroit"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "menu": "Menu",
+    "orders": "Commandes",
+    "tables": "Tables",
+    "kitchen": "Cuisine",
+    "inventory": "Stock",
+    "staff": "Personnel",
+    "reservations": "Réservations",
+    "billing": "Facturation",
+    "reports": "Rapports"
+  },
+  "auth": {
+    "login": "Connexion",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "logout": "Déconnexion",
+    "welcome": "Bon retour"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "revenue": "Revenu du jour",
+    "orders": "Commandes actives",
+    "tables": "Tables occupées",
+    "lowStock": "Articles en rupture"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "search": "Rechercher",
+    "comingSoon": "Bientôt disponible"
+  },
+  "theme": {
+    "light": "Mode clair",
+    "dark": "Mode sombre"
+  }
+}

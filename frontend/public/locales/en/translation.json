@@ -1,0 +1,64 @@
+{
+  "app": {
+    "name": "Restaurant RMS",
+    "tagline": "Manage your restaurant in one place"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "menu": "Menu",
+    "orders": "Orders",
+    "tables": "Tables",
+    "kitchen": "Kitchen",
+    "inventory": "Inventory",
+    "staff": "Staff",
+    "reservations": "Reservations",
+    "billing": "Billing",
+    "reports": "Reports"
+  },
+  "auth": {
+    "login": "Sign in",
+    "email": "Email",
+    "password": "Password",
+    "logout": "Log out",
+    "welcome": "Welcome back",
+    "cashierSide": "Cashier",
+    "kitchenSide": "Kitchen",
+    "cashierLogin": "Cashier sign in",
+    "kitchenLogin": "Kitchen sign in",
+    "invalidCredentials": "Invalid email or password",
+    "wrongSide": {
+      "cashier": "This account is not a cashier. Use Kitchen login.",
+      "kitchen": "This account is not kitchen staff. Use Cashier login."
+    }
+  },
+  "kitchen": {
+    "title": "All orders",
+    "subtitle": "Live order queue for the kitchen",
+    "orderCount": "orders",
+    "table": "Table",
+    "noTable": "Takeaway",
+    "note": "Note",
+    "noOrders": "No orders yet",
+    "loadError": "Could not load orders"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "revenue": "Today's revenue",
+    "orders": "Active orders",
+    "tables": "Occupied tables",
+    "lowStock": "Low stock items"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "search": "Search",
+    "comingSoon": "Coming soon"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode"
+  }
+}
