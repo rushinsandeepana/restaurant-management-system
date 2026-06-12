@@ -92,7 +92,7 @@ App: http://localhost:5173
 | Orders        | Placeholder   |
 | Tables        | Placeholder   |
 | Kitchen (KDS) | Placeholder   |
-| Inventory     | Placeholder   |
+| Meal          | Placeholder   |
 | Staff         | Placeholder   |
 | Reservations  | Placeholder   |
 | Billing       | Placeholder   |

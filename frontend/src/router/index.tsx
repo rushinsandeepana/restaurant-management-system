@@ -3,6 +3,7 @@ import { KitchenLayout } from '@/components/layout/KitchenLayout'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { KitchenOrdersPage } from '@/features/kitchen/KitchenOrdersPage'
+import { MealPage } from '@/features/meal/MealPage'
 import { PlaceholderPage } from '@/features/shared/PlaceholderPage'
 import { RoleRoute } from '@/router/RoleRoute'
 import { useAuthStore } from '@/store/authStore'
@@ -47,7 +48,7 @@ export const router = createBrowserRouter([
           { path: 'orders', element: <PlaceholderPage titleKey="nav.orders" /> },
           { path: 'tables', element: <PlaceholderPage titleKey="nav.tables" /> },
           { path: 'kitchen', element: <PlaceholderPage titleKey="nav.kitchen" /> },
-          { path: 'inventory', element: <PlaceholderPage titleKey="nav.inventory" /> },
+          { path: 'meals', element: <MealPage /> },
           { path: 'staff', element: <PlaceholderPage titleKey="nav.staff" /> },
           { path: 'reservations', element: <PlaceholderPage titleKey="nav.reservations" /> },
           { path: 'billing', element: <PlaceholderPage titleKey="nav.billing" /> },

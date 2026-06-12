@@ -1,35 +1,89 @@
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: rms-postgres
-    env_file:
-      - ./backend/.env
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: rms-backend
-    depends_on:
-      postgres:
-        condition: service_healthy
-    env_file:
-      - ./backend/.env
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-rms}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-rms}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-rms}
-    ports:
-      - "8080:8080"
-
-volumes:
-  postgres_data:
+services:
+
+  postgres:
+
+    image: postgres:16-alpine
+
+    container_name: rms-postgres
+
+    env_file:
+
+      - ./backend/.env
+
+    ports:
+
+      - "5432:5432"
+
+    volumes:
+
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+
+      interval: 5s
+
+      timeout: 5s
+
+      retries: 5
+
+
+
+  backend:
+
+    build:
+
+      context: ./backend
+
+      dockerfile: Dockerfile
+
+    container_name: rms-backend
+
+    depends_on:
+
+      postgres:
+
+        condition: service_healthy
+
+    env_file:
+
+      - ./backend/.env
+
+    environment:
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-rms}
+
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-rms}
+
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-rms}
+
+    ports:
+
+      - "8080:8080"
+
+  adminer:
+
+    image: adminer:latest
+
+    container_name: rms-adminer
+
+    depends_on:
+
+      postgres:
+
+        condition: service_healthy
+
+    environment:
+
+      ADMINER_DEFAULT_SERVER: postgres
+
+    ports:
+
+      - "8888:8080"
+
+
+volumes:
+
+  postgres_data:
+

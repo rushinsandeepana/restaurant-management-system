@@ -9,7 +9,7 @@
     "orders": "Orders",
     "tables": "Tables",
     "kitchen": "Kitchen",
-    "inventory": "Inventory",
+    "meals": "Meals",
     "staff": "Staff",
     "reservations": "Reservations",
     "billing": "Billing",
@@ -47,6 +47,50 @@
     "orders": "Active orders",
     "tables": "Occupied tables",
     "lowStock": "Low stock items"
+  },
+  "meal": {
+    "title": "Meal",
+    "subtitle": "Manage meals, stock quantities, and pricing",
+    "addMeal": "Add meal",
+    "addVariation": "Add variation",
+    "noVariations": "No variations added yet.",
+    "searchPlaceholder": "Search by meal name...",
+    "totalItems": "{{count}} meals",
+    "noMeals": "No meals found",
+    "loadError": "Could not load meals",
+    "pageInfo": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "columns": {
+      "image": "Image",
+      "name": "Name",
+      "quantity": "Quantity",
+      "variations": "Variations",
+      "basePrice": "Base price",
+      "totalPrice": "Total price",
+      "createdAt": "Created"
+    },
+    "fields": {
+      "name": "Meal name",
+      "image": "Meal image",
+      "quantity": "Quantity",
+      "basePrice": "Base price",
+      "variations": "Variations",
+      "variationName": "Variation name",
+      "priceAdjustment": "Extra price"
+    },
+    "errors": {
+      "nameRequired": "Meal name is required",
+      "imageRequired": "Meal image is required",
+      "quantityRequired": "Quantity is required",
+      "quantityMin": "Quantity must be at least 0",
+      "basePriceRequired": "Base price is required",
+      "basePriceMin": "Base price must be greater than 0",
+      "atLeastOneVariation": "At least one variation must be added",
+      "variationNameRequired": "Variation name is required",
+      "priceAdjustmentRequired": "Price adjustment is required",
+      "priceAdjustmentMin": "Price adjustment must be at least 0"
+    }
   },
   "common": {
     "loading": "Loading...",

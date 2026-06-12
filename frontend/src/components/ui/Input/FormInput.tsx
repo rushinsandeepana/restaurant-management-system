@@ -5,11 +5,13 @@ import { forwardRef } from 'react'
 interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
+  required?: boolean
 }
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
-  function FormInput({ label, error, className, id, ...props }, ref) {
+  function FormInput({ label, error, required, className, id, ...props }, ref) {
     const inputId = id ?? props.name
+
     return (
       <div className="space-y-1">
         {label && (
@@ -18,8 +20,16 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             className="block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             {label}
+
+            {required && (
+              <span className="ml-1 text-red-500">
+                *
+              </span>
+            )}
+
           </label>
         )}
+
         <input
           ref={ref}
           id={inputId}
@@ -30,6 +40,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           )}
           {...props}
         />
+
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
     )
