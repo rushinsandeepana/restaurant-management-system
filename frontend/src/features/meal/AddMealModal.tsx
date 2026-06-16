@@ -15,7 +15,10 @@ interface FormData {
   name: string
   imageUrl: string
   quantity: number
-  basePrice: number
+  basePrices: {
+    size: string
+    price: number
+  }[]
   variations: {
     name: string
     priceAdjustment: number
@@ -26,7 +29,12 @@ const createSchema = (t: (key: string, options?: Record<string, unknown>) => str
   name: z.string().min(1, { message: t('meal.errors.nameRequired') }),
   imageUrl: z.string().min(1, { message: t('meal.errors.imageRequired') }),
   quantity: z.number({ message: t('meal.errors.quantityRequired') }).int().min(0, { message: t('meal.errors.quantityMin') }),
-  basePrice: z.number({ message: t('meal.errors.basePriceRequired') }).min(0.01, { message: t('meal.errors.basePriceMin') }),
+  basePrices: z.array(
+    z.object({
+      size: z.string().min(1, { message: t('meal.errors.sizeRequired') }),
+      price: z.number({ message: t('meal.errors.basePriceRequired') }).min(0.01, { message: t('meal.errors.basePriceMin') }),
+    })
+  ).min(1, { message: t('meal.errors.atLeastOneBasePrice') }),
   variations: z.array(
     z.object({
       name: z.string().min(1, { message: t('meal.errors.variationNameRequired') }),
@@ -63,12 +71,19 @@ export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) 
       name: '',
       imageUrl: '',
       quantity: 0,
-      basePrice: 0,
+      basePrices: [],
       variations: [],
     },
   })
 
-  const { fields, append, remove } = useFieldArray({ control, name: 'variations' })
+  const { fields: basePriceFields, append: appendBasePrice, remove: removeBasePrice } = useFieldArray({ 
+    control, 
+    name: 'basePrices' 
+  })
+  const { fields: variationFields, append: appendVariation, remove: removeVariation } = useFieldArray({ 
+    control, 
+    name: 'variations' 
+  })
 
   // Clean up states asynchronously when modal is closed
   useEffect(() => {
@@ -91,7 +106,7 @@ export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) 
       name: data.name,
       imageUrl: data.imageUrl,
       quantity: data.quantity,
-      basePrice: data.basePrice,
+      basePrices: data.basePrices,
       variations: data.variations.length > 0 ? data.variations : undefined,
     })
     onSuccess()
@@ -214,7 +229,7 @@ export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) 
           )}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <FormInput
             label={t('meal.fields.name')}
             required
@@ -229,15 +244,72 @@ export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) 
             error={errors.quantity?.message}
             {...register('quantity', { valueAsNumber: true })}
           />
-          <FormInput
-            label={t('meal.fields.basePrice')}
-            required
-            type="number"
-            min={0}
-            step="0.01"
-            error={errors.basePrice?.message}
-            {...register('basePrice', { valueAsNumber: true })}
-          />
+        </div>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('meal.fields.basePrices')}
+              <span className="ml-1 text-red-500">
+                *
+              </span>
+            </h3>
+            
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              icon={<Plus className="h-4 w-4" />}
+              onClick={() => appendBasePrice({ size: '', price: 0 })}
+            >
+              {t('meal.addPrice')}
+            </Button>
+          </div>
+
+          {basePriceFields.length === 0 && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('meal.noBasePrices')}
+            </p>
+          )}
+
+          {basePriceFields.map((field, index) => (
+            <div key={field.id} className="flex items-end gap-2">
+              <div className="flex-1">
+                <FormInput
+                  label={t('meal.fields.size')}
+                  placeholder={t('meal.placeholders.size')}
+                  required
+                  error={errors.basePrices?.[index]?.size?.message}
+                  {...register(`basePrices.${index}.size`)}
+                />
+              </div>
+              <div className="w-36">
+                <FormInput
+                  label={t('meal.fields.price')}
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  placeholder="0.00"
+                  required
+                  error={errors.basePrices?.[index]?.price?.message}
+                  {...register(`basePrices.${index}.price`, { valueAsNumber: true })}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                aria-label={t('common.delete')}
+                onClick={() => removeBasePrice(index)}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          ))}
+
+          {errors.basePrices?.message && (
+            <p className="text-sm text-red-600">{errors.basePrices.message}</p>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -254,19 +326,19 @@ export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) 
               variant="secondary"
               size="sm"
               icon={<Plus className="h-4 w-4" />}
-              onClick={() => append({ name: '', priceAdjustment: 0 })}
+              onClick={() => appendVariation({ name: '', priceAdjustment: 0 })}
             >
               {t('meal.addVariation')}
             </Button>
           </div>
 
-          {fields.length === 0 && (
+          {variationFields.length === 0 && (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {t('meal.noVariations')}
             </p>
           )}
 
-          {fields.map((field, index) => (
+          {variationFields.map((field, index) => (
             <div key={field.id} className="flex items-end gap-2">
               <div className="flex-1">
                 <FormInput
@@ -291,7 +363,7 @@ export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) 
                 variant="ghost"
                 size="sm"
                 aria-label={t('common.delete')}
-                onClick={() => remove(index)}
+                onClick={() => removeVariation(index)}
               >
                 <Trash2 className="h-4 w-4 text-red-500" />
               </Button>

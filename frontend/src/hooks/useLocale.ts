@@ -7,8 +7,9 @@ export function useLocale() {
   const setLanguage = (code: SupportedLanguage) => {
     i18n.changeLanguage(code)
     localStorage.setItem('rms-locale', code)
-    const isRtl = code === 'ar'
-    document.documentElement.dir = isRtl ? 'rtl' : 'ltr'
+    // const isRtl = code === 'ar'
+    // document.documentElement.dir = isRtl ? 'rtl' : 'ltr'
+    document.documentElement.dir = 'ltr'
     document.documentElement.lang = code
   }
 

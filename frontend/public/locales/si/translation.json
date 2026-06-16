@@ -38,6 +38,40 @@
     "search": "සොයන්න",
     "comingSoon": "ඉක්මනින් පැමිණේ"
   },
+  "category": {
+    "title": "ප්‍රවර්ගය",
+    "subtitle": "ප්‍රවර්ග, තොග ප්‍රමාණ, සහ මිල කළමනාකරණය කරන්න",
+    "addCategory": "ප්‍රවර්ගයක් එක් කරන්න",
+    "searchPlaceholder": "ප්‍රවර්ග නාමයෙන් සොයන්න...",
+    "totalItems": "{{count}} ප්‍රවර්ග",
+    "noCategories": "ප්‍රවර්ග හමු නොවීය",
+    "loadError": "ප්‍රවර්ග පූරණය කළ නොහැක",
+    "pageInfo": "පිටුව {{current}} / {{total}}",
+    "previous": "පෙර",
+    "next": "ඊළඟ",
+    "columns": {
+      "image": "රූපය",
+      "name": "නම",
+      "quantity": "ප්‍රමාණය",
+      "basePrice": "මූලික මිල",
+      "totalPrice": "මුළු මිල",
+      "createdAt": "සාදන ලද දිනය"
+    },
+    "fields": {
+      "name": "ප්‍රවර්ග නාමය",
+      "image": "ප්‍රවර්ග රූපය",
+      "quantity": "ප්‍රමාණය",
+      "basePrice": "මූලික මිල"
+    },
+    "errors": {
+      "nameRequired": "ප්‍රවර්ග නාමය අවශ්‍ය වේ",
+      "imageRequired": "ප්‍රවර්ග රූපය අවශ්‍ය වේ",
+      "quantityRequired": "ප්‍රමාණය අවශ්‍ය වේ",
+      "quantityMin": "ප්‍රමාණය අවම වශයෙන් 0 විය යුතුය",
+      "basePriceRequired": "මූලික මිල අවශ්‍ය වේ",
+      "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය"
+    }
+  },
   "theme": {
     "light": "එළිය මාදිලිය",
     "dark": "අඳුරු මාදිලිය"

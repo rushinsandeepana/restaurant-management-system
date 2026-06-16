@@ -25,7 +25,11 @@ export interface CreateMealRequest {
   name: string
   imageUrl?: string
   quantity: number
-  basePrice: number
+  // basePrice: number
+  basePrices: {
+    size: string
+    price: number
+  }[]
   variations?: MealVariationInput[]
 }
 

@@ -5,9 +5,9 @@ import HttpBackend from 'i18next-http-backend'
 export const supportedLanguages = [
   { code: 'en', label: 'English', flag: '🇬🇧' },
   { code: 'si', label: 'සිංහල', flag: '🇱🇰' },
-  { code: 'ta', label: 'தமிழ்', flag: '🇱🇰' },
-  { code: 'fr', label: 'Français', flag: '🇫🇷' },
-  { code: 'ar', label: 'العربية', flag: '🇸🇦' },
+  // { code: 'ta', label: 'தமிழ்', flag: '🇱🇰' },
+  // { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  // { code: 'ar', label: 'العربية', flag: '🇸🇦' },
 ] as const
 
 export type SupportedLanguage = (typeof supportedLanguages)[number]['code']

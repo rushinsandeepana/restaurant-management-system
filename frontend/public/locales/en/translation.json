@@ -10,6 +10,7 @@
     "tables": "Tables",
     "kitchen": "Kitchen",
     "meals": "Meals",
+    "categories": "Categories",
     "staff": "Staff",
     "reservations": "Reservations",
     "billing": "Billing",
@@ -90,6 +91,40 @@
       "variationNameRequired": "Variation name is required",
       "priceAdjustmentRequired": "Price adjustment is required",
       "priceAdjustmentMin": "Price adjustment must be at least 0"
+    }
+  },
+  "category": {
+    "title": "Category",
+    "subtitle": "Manage categories, stock quantities, and pricing",
+    "addCategory": "Add category",
+    "searchPlaceholder": "Search by category name...",
+    "totalItems": "{{count}} categories",
+    "noCategories": "No categories found",
+    "loadError": "Could not load categories",
+    "pageInfo": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "columns": {
+      "image": "Image",
+      "name": "Name",
+      "quantity": "Quantity",
+      "basePrice": "Base price",
+      "totalPrice": "Total price",
+      "createdAt": "Created"
+    },
+    "fields": {
+      "name": "Category name",
+      "image": "Category image",
+      "quantity": "Quantity",
+      "basePrice": "Base price"
+    },
+    "errors": {
+      "nameRequired": "Category name is required",
+      "imageRequired": "Category image is required",
+      "quantityRequired": "Quantity is required",
+      "quantityMin": "Quantity must be at least 0",
+      "basePriceRequired": "Base price is required",
+      "basePriceMin": "Base price must be greater than 0"
     }
   },
   "common": {

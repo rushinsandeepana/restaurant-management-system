@@ -1,6 +1,7 @@
 import { AppLayout } from '@/components/layout/AppLayout'
 import { KitchenLayout } from '@/components/layout/KitchenLayout'
 import { LoginPage } from '@/features/auth/LoginPage'
+import { CategoryPage } from '@/features/categories/CategoryPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { KitchenOrdersPage } from '@/features/kitchen/KitchenOrdersPage'
 import { MealPage } from '@/features/meal/MealPage'
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
           { path: 'orders', element: <PlaceholderPage titleKey="nav.orders" /> },
           { path: 'tables', element: <PlaceholderPage titleKey="nav.tables" /> },
           { path: 'kitchen', element: <PlaceholderPage titleKey="nav.kitchen" /> },
+          { path: 'categories', element: <CategoryPage /> },
           { path: 'meals', element: <MealPage /> },
           { path: 'staff', element: <PlaceholderPage titleKey="nav.staff" /> },
           { path: 'reservations', element: <PlaceholderPage titleKey="nav.reservations" /> },
