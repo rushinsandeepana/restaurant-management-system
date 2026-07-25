@@ -5,7 +5,9 @@ import { CategoryPage } from '@/features/categories/CategoryPage'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { KitchenOrdersPage } from '@/features/kitchen/KitchenOrdersPage'
 import { MealPage } from '@/features/meal/MealPage'
+import { ModifierPage } from '@/features/modifiers/ModifiersPage'
 import { PlaceholderPage } from '@/features/shared/PlaceholderPage'
+import { TablesPage } from '@/features/tables/TablesPage'
 import { RoleRoute } from '@/router/RoleRoute'
 import { useAuthStore } from '@/store/authStore'
 import { Navigate, createBrowserRouter } from 'react-router-dom'
@@ -47,9 +49,10 @@ export const router = createBrowserRouter([
           { index: true, element: <DashboardPage /> },
           { path: 'menu', element: <PlaceholderPage titleKey="nav.menu" /> },
           { path: 'orders', element: <PlaceholderPage titleKey="nav.orders" /> },
-          { path: 'tables', element: <PlaceholderPage titleKey="nav.tables" /> },
+          { path: 'tables', element: <TablesPage /> },
           { path: 'kitchen', element: <PlaceholderPage titleKey="nav.kitchen" /> },
           { path: 'categories', element: <CategoryPage /> },
+          { path: 'modifiers', element: <ModifierPage /> },
           { path: 'meals', element: <MealPage /> },
           { path: 'staff', element: <PlaceholderPage titleKey="nav.staff" /> },
           { path: 'reservations', element: <PlaceholderPage titleKey="nav.reservations" /> },

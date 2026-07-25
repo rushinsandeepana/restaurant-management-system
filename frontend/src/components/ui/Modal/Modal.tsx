@@ -29,7 +29,7 @@ export function Modal({ isOpen, onClose, title, size = 'md', children }: ModalPr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden />
+      <div className="absolute inset-0 bg-black/50" aria-hidden />
       <div
         className={cn(
           'relative w-full rounded-xl bg-white shadow-xl dark:bg-gray-900',

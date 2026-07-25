@@ -11,6 +11,7 @@
     "kitchen": "Kitchen",
     "meals": "Meals",
     "categories": "Categories",
+    "modifiers": "Modifiers",
     "staff": "Staff",
     "reservations": "Reservations",
     "billing": "Billing",
@@ -110,7 +111,8 @@
       "quantity": "Quantity",
       "basePrice": "Base price",
       "totalPrice": "Total price",
-      "createdAt": "Created"
+      "createdAt": "Created",
+      "status": "Status"
     },
     "fields": {
       "name": "Category name",
@@ -121,6 +123,77 @@
     "errors": {
       "nameRequired": "Category name is required",
       "imageRequired": "Category image is required",
+      "quantityRequired": "Quantity is required",
+      "quantityMin": "Quantity must be at least 0",
+      "basePriceRequired": "Base price is required",
+      "basePriceMin": "Base price must be greater than 0"
+    }
+  },
+  "modifier": {
+    "title": "Modifier",
+    "subtitle": "Manage modifiers, stock quantities, and pricing",
+    "addModifier": "Add modifier",
+    "searchPlaceholder": "Search by modifier name...",
+    "totalItems": "{{count}} modifiers",
+    "noModifiers": "No modifiers found",
+    "loadError": "Could not load modifiers",
+    "pageInfo": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "columns": {
+      "image": "Image",
+      "name": "Name",
+      "quantity": "Quantity",
+      "basePrice": "Base price",
+      "totalPrice": "Total price",
+      "createdAt": "Created",
+      "status": "Status"
+    },
+    "fields": {
+      "name": "Modifier name",
+      "image": "Modifier image",
+      "quantity": "Quantity",
+      "basePrice": "Base price"
+    },
+    "errors": {
+      "nameRequired": "Modifier name is required",
+      "imageRequired": "Modifier image is required",
+      "quantityRequired": "Quantity is required",
+      "quantityMin": "Quantity must be at least 0",
+      "basePriceRequired": "Base price is required",
+      "basePriceMin": "Base price must be greater than 0"
+    }
+  },
+  "table": {
+    "title": "Table",
+    "subtitle": "Manage tables, stock quantities, and pricing",
+    "addTable": "Add table",
+    "searchPlaceholder": "Search by table name...",
+    "totalItems": "{{count}} tables",
+    "noTables": "No tables found",
+    "loadError": "Could not load tables",
+    "pageInfo": "Page {{current}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "columns": {
+      "image": "Image",
+      "id": "Id",
+      "name": "Name",
+      "quantity": "Quantity",
+      "basePrice": "Base price",
+      "totalPrice": "Total price",
+      "createdAt": "Created",
+      "status": "Status"
+    },
+    "fields": {
+      "name": "Table name",
+      "image": "Table image",
+      "quantity": "Quantity",
+      "basePrice": "Base price"
+    },
+    "errors": {
+      "nameRequired": "Table name is required",
+      "imageRequired": "Table image is required",
       "quantityRequired": "Quantity is required",
       "quantityMin": "Quantity must be at least 0",
       "basePriceRequired": "Base price is required",

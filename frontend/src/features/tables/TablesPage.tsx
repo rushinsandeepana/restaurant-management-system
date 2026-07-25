@@ -3,17 +3,13 @@ import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Table, type TableColumn } from '@/components/ui/Table'
-import { AddCategoryModal } from '@/features/categories/AddCategoryModel'
-import type { Category } from '@/types/category'
-import { Plus, Search, UtensilsCrossed } from 'lucide-react'
+import type { Modifier } from '@/types/category'
+import { Plus, Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AddTableModal } from './AddTablesModel'
 
 const PAGE_SIZE = 10
-
-function formatPrice(value: number) {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(value)
-}
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -23,9 +19,9 @@ function formatDate(value: string) {
   }).format(new Date(value))
 }
 
-export function CategoryPage() {
+export function TablesPage() {
   const { t } = useTranslation()
-  const [categories, setCategories] = useState<Category[]>([])
+  const [modifiers, setModifiers] = useState<Modifier[]>([])
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
@@ -40,11 +36,11 @@ export function CategoryPage() {
     setError(null)
     try {
       const data = await categoryApi.getPage({ search, page, size: PAGE_SIZE })
-      setCategories(data.content)
+      setModifiers(data.content)
       setTotalPages(data.totalPages)
       setTotalElements(data.totalElements)
     } catch {
-      setError(t('category.loadError'))
+      setError(t('table.loadError'))
     } finally {
       setLoading(false)
     }
@@ -70,47 +66,40 @@ export function CategoryPage() {
     loadMeals()
   }
 
-  const columns: TableColumn<Category>[] = [
+  const columns: TableColumn<Modifier>[] = [
     {
-      header: t('category.columns.image'),
-      key: 'imageUrl',
-      cell: (category) =>
-        category.imageUrl ? (
-          <img
-            src={category.imageUrl}
-            alt={category.name}
-            className="h-12 w-12 rounded-lg object-cover"
-          />
-        ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
-            <UtensilsCrossed className="h-5 w-5 text-gray-400" />
-          </div>
-        ),
+      header: t('table.columns.id'),
+      key: 'id',
+      cell: (table) => (
+        <span className="font-medium text-gray-900 dark:text-white">
+          {table.id}
+        </span>
+      ),
     },
     {
-      header: t('category.columns.name'),
+      header: t('table.columns.name'),
       key: 'name',
-      cell: (category) => (
+      cell: (table) => (
         <span className="font-medium text-gray-900 dark:text-white">
-          {category.name}
+          {table.name}
         </span>
       ),
     },
     {
-      header: t('category.columns.status'),
+      header: t('table.columns.status'),
       key: 'status',
-      cell: (category) => (
+      cell: (table) => (
         <span className="font-medium text-gray-900 dark:text-white">
-          {category.status}
+          {table.status}
         </span>
       ),
     },
     {
-      header: t('category.columns.createdAt'),
+      header: t('table.columns.createdAt'),
       key: 'createdAt',
-      cell: (category) => (
+      cell: (table) => (
         <span className="text-gray-600 dark:text-gray-400">
-          {formatDate(category.createdAt)}
+          {formatDate(table.createdAt)}
         </span>
       ),
     },
@@ -118,11 +107,11 @@ export function CategoryPage() {
 
   return (
     <PageWrapper
-      title={t('category.title')}
-      description={t('category.subtitle')}
+      title={t('table.title')}
+      description={t('table.subtitle')}
       actions={
         <Button icon={<Plus className="h-4 w-4" />} onClick={() => setModalOpen(true)}>
-          {t('category.addCategory')}
+          {t('table.addTable')}
         </Button>
       }
     >
@@ -134,22 +123,22 @@ export function CategoryPage() {
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={t('category.searchPlaceholder')}
+              placeholder={t('table.searchPlaceholder')}
               className="w-full rounded-lg border border-gray-300 bg-white py-2 ps-9 pe-3 text-sm shadow-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
             />
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('category.totalItems', { count: totalElements })}
+            {t('table.totalItems', { count: totalElements })}
           </p>
         </div>
 
         <Table
-          data={categories}
+          data={modifiers}
           columns={columns}
-          rowKey={(category) => category.id}
+          rowKey={(table) => table.id}
           loading={loading}
           error={error}
-          emptyMessage={t('category.noMeals')}
+          emptyMessage={t('table.noMeals')}
           pagination={{
             currentPage: page,
             totalPages,
@@ -159,7 +148,7 @@ export function CategoryPage() {
         />
       </Card>
 
-      <AddCategoryModal
+      <AddTableModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSuccess={handleMealAdded}

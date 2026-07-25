@@ -18,6 +18,7 @@ const navItems = [
   { to: '/menu', icon: UtensilsCrossed, key: 'menu' },
   { to: '/orders', icon: ClipboardList, key: 'orders' },
   { to: '/categories', icon: ClipboardList, key: 'categories' },
+  { to: '/modifiers', icon: UtensilsCrossed, key: 'modifiers' },
   { to: '/meals', icon: Warehouse, key: 'meals' },
   { to: '/tables', icon: UtensilsCrossed, key: 'tables' },
   { to: '/kitchen', icon: ChefHat, key: 'kitchen' },

@@ -10,6 +10,8 @@
     "tables": "මේස",
     "kitchen": "කුස්සිය",
     "meals": "ආහාර වේල්",
+    "categories": "ප්‍රවර්ගය",
+    "modifiers": "මෝඩිෆයර්",
     "staff": "කාර්ය මණ්ඩලය",
     "reservations": "වෙන්කිරීම්",
     "billing": "බිල්පත්",
@@ -55,7 +57,8 @@
       "quantity": "ප්‍රමාණය",
       "basePrice": "මූලික මිල",
       "totalPrice": "මුළු මිල",
-      "createdAt": "සාදන ලද දිනය"
+      "createdAt": "සාදන ලද දිනය",
+      "status": "තත්ත්වය"
     },
     "fields": {
       "name": "ප්‍රවර්ග නාමය",
@@ -69,6 +72,77 @@
       "quantityRequired": "ප්‍රමාණය අවශ්‍ය වේ",
       "quantityMin": "ප්‍රමාණය අවම වශයෙන් 0 විය යුතුය",
       "basePriceRequired": "මූලික මිල අවශ්‍ය වේ",
+      "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය"
+    }
+  },
+  "modifier": {
+    "title": "මෝඩිෆයර්",
+    "subtitle": "මෝඩිෆයර්, තොග ප්‍රමාණ, සහ මිල කළමනාකරණය කරන්න",
+    "addCategory": "මෝඩිෆයර් එකතු කරන්න",
+    "searchPlaceholder": "මෝඩිෆයර් නාමයෙන් සොයන්න...",
+    "totalItems": "{{count}} මෝඩිෆයර්",
+    "noCategories": "මෝඩිෆයර් හමු නොවීය",
+    "loadError": "මෝඩිෆයර් පූරණය කළ නොහැක",
+    "pageInfo": "පිටුව {{current}} / {{total}}",
+    "previous": "පෙර",
+    "next": "ඊළඟ",
+    "columns": {
+      "image": "රූපය",
+      "name": "නම",
+      "quantity": "ප්‍රමාණය",
+      "basePrice": "මූලික මිල",
+      "totalPrice": "මුළු මිල",
+      "createdAt": "සාදන ලද දිනය",
+      "status": "තත්ත්වය"
+    },
+    "fields": {
+      "name": "මෝඩිෆයර් නාමය",
+      "image": "මෝඩිෆයර් රූපය",
+      "quantity": "ප්‍රමාණය",
+      "basePrice": "මූලික මිල"
+    },
+    "errors": {
+      "nameRequired": "මෝඩිෆයර් නාමය අවශ්ය වේ",
+      "imageRequired": "මෝඩිෆයර් රූපය අවශ්ය වේ",
+      "quantityRequired": "ප්‍රමාණය අවශ්ය වේ",
+      "quantityMin": "ප්‍රමාණය අවම වශයෙන් 0 විය යුතුය",
+      "basePriceRequired": "මූලික මිල අවශ්ය වේ",
+      "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය"
+    }
+  },
+  "table": {
+    "title": "මේස",
+    "subtitle": "මේස, තොග ප්‍රමාණ, සහ මිල කළමනාකරණය කරන්න",
+    "addTable": "මේස එකතු කරන්න",
+    "searchPlaceholder": "මේස නාමයෙන් සොයන්න...",
+    "totalItems": "{{count}} මේස",
+    "noTables": "මේස හමු නොවීය",
+    "loadError": "මේස පූරණය කළ නොහැක",
+    "pageInfo": "පිටුව {{current}} / {{total}}",
+    "previous": "පෙර",
+    "next": "ඊළඟ",
+    "columns": {
+      "image": "රූපය",
+      "id": "අයිඩී",
+      "name": "නම",
+      "quantity": "ප්‍රමාණය",
+      "basePrice": "මූලික මිල",
+      "totalPrice": "මුළු මිල",
+      "createdAt": "සාදන ලද දිනය",
+      "status": "තත්ත්වය"
+    },
+    "fields": {
+      "name": "මේස නාමය",
+      "image": "මේස රූපය",
+      "quantity": "ප්‍රමාණය",
+      "basePrice": "මූලික මිල"
+    },
+    "errors": {
+      "nameRequired": "මේස නාමය අවශ්ය වේ",
+      "imageRequired": "මේස රූපය අවශ්ය වේ",
+      "quantityRequired": "ප්රමාණය අවශ්ය වේ",
+      "quantityMin": "ප්රමාණය අවම වශයෙන් 0 විය යුතුය",
+      "basePriceRequired": "මූලික මිල අවශ්ය වේ",
       "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය"
     }
   },

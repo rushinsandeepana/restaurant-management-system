@@ -28,3 +28,26 @@ export interface PageResponse<T> {
   size: number
   number: number
 }
+
+
+
+export interface Modifier {
+  id: number
+  name: string
+  slug: string
+  description: string
+  status: Status
+  imageUrl: string
+  quantity: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateModifierRequest {
+  name: string
+  slug: string
+  description: string
+  status: Status
+  imageUrl: string
+  base_price: number
+}

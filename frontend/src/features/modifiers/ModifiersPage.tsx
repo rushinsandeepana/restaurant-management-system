@@ -4,16 +4,17 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Table, type TableColumn } from '@/components/ui/Table'
 import { AddCategoryModal } from '@/features/categories/AddCategoryModel'
-import type { Category } from '@/types/category'
+import type { Modifier } from '@/types/category'
 import { Plus, Search, UtensilsCrossed } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AddModifierModal } from './AddModifiersModel'
 
 const PAGE_SIZE = 10
 
-function formatPrice(value: number) {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(value)
-}
+// function formatPrice(value: number) {
+//   return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(value)
+// }
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat(undefined, {
@@ -23,9 +24,9 @@ function formatDate(value: string) {
   }).format(new Date(value))
 }
 
-export function CategoryPage() {
+export function ModifierPage() {
   const { t } = useTranslation()
-  const [categories, setCategories] = useState<Category[]>([])
+  const [modifiers, setModifiers] = useState<Modifier[]>([])
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [totalElements, setTotalElements] = useState(0)
@@ -40,11 +41,11 @@ export function CategoryPage() {
     setError(null)
     try {
       const data = await categoryApi.getPage({ search, page, size: PAGE_SIZE })
-      setCategories(data.content)
+      setModifiers(data.content)
       setTotalPages(data.totalPages)
       setTotalElements(data.totalElements)
     } catch {
-      setError(t('category.loadError'))
+      setError(t('modifier.loadError'))
     } finally {
       setLoading(false)
     }
@@ -70,15 +71,15 @@ export function CategoryPage() {
     loadMeals()
   }
 
-  const columns: TableColumn<Category>[] = [
+  const columns: TableColumn<Modifier>[] = [
     {
-      header: t('category.columns.image'),
+      header: t('modifier.columns.image'),
       key: 'imageUrl',
-      cell: (category) =>
-        category.imageUrl ? (
+      cell: (modifier) =>
+        modifier.imageUrl ? (
           <img
-            src={category.imageUrl}
-            alt={category.name}
+            src={modifier.imageUrl}
+            alt={modifier.name}
             className="h-12 w-12 rounded-lg object-cover"
           />
         ) : (
@@ -88,29 +89,29 @@ export function CategoryPage() {
         ),
     },
     {
-      header: t('category.columns.name'),
+      header: t('modifier.columns.name'),
       key: 'name',
-      cell: (category) => (
+      cell: (modifier) => (
         <span className="font-medium text-gray-900 dark:text-white">
-          {category.name}
+          {modifier.name}
         </span>
       ),
     },
     {
-      header: t('category.columns.status'),
+      header: t('modifier.columns.status'),
       key: 'status',
-      cell: (category) => (
+      cell: (modifier) => (
         <span className="font-medium text-gray-900 dark:text-white">
-          {category.status}
+          {modifier.status}
         </span>
       ),
     },
     {
-      header: t('category.columns.createdAt'),
+      header: t('modifier.columns.createdAt'),
       key: 'createdAt',
-      cell: (category) => (
+      cell: (modifier) => (
         <span className="text-gray-600 dark:text-gray-400">
-          {formatDate(category.createdAt)}
+          {formatDate(modifier.createdAt)}
         </span>
       ),
     },
@@ -118,11 +119,11 @@ export function CategoryPage() {
 
   return (
     <PageWrapper
-      title={t('category.title')}
-      description={t('category.subtitle')}
+      title={t('modifier.title')}
+      description={t('modifier.subtitle')}
       actions={
         <Button icon={<Plus className="h-4 w-4" />} onClick={() => setModalOpen(true)}>
-          {t('category.addCategory')}
+          {t('modifier.addModifier')}
         </Button>
       }
     >
@@ -134,22 +135,22 @@ export function CategoryPage() {
               type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder={t('category.searchPlaceholder')}
+              placeholder={t('modifier.searchPlaceholder')}
               className="w-full rounded-lg border border-gray-300 bg-white py-2 ps-9 pe-3 text-sm shadow-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100"
             />
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('category.totalItems', { count: totalElements })}
+            {t('modifier.totalItems', { count: totalElements })}
           </p>
         </div>
 
         <Table
-          data={categories}
+          data={modifiers}
           columns={columns}
-          rowKey={(category) => category.id}
+          rowKey={(modifier) => modifier.id}
           loading={loading}
           error={error}
-          emptyMessage={t('category.noMeals')}
+          emptyMessage={t('modifier.noMeals')}
           pagination={{
             currentPage: page,
             totalPages,
@@ -159,7 +160,7 @@ export function CategoryPage() {
         />
       </Card>
 
-      <AddCategoryModal
+      <AddModifierModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSuccess={handleMealAdded}
