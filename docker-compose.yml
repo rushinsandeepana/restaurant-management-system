@@ -58,9 +58,17 @@ services:
 
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-rms}
 
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+
     ports:
 
       - "8080:8080"
+
+      - "5005:5005"
+
+    volumes:                                          
+      - ./backend/target/classes:/app/target/classes   
+      - ./backend/src:/app/src 
 
   adminer:
 

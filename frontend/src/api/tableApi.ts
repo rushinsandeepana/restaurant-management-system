@@ -8,6 +8,7 @@ export type TableStatus = 'AVAILABLE' | 'UNAVAILABLE'
 export interface Table {
   id: number
   name: string
+  number: number
   status: TableStatus
   createdAt: string
   updatedAt: string
@@ -15,6 +16,7 @@ export interface Table {
 
 export interface CreateTableRequest {
   name:   string
+  number: number
   status: TableStatus
 }
 
@@ -40,4 +42,7 @@ export const tableApi = {
 
   create: (body: CreateTableRequest) =>
     apiClient.post<Table>('/api/tables', body).then((r) => r.data),
+  update: (id: number, body: CreateTableRequest) =>
+    apiClient.put<Table>(`/api/tables/${id}`, body).then((r) => r.data),
+  delete: (id: number) => apiClient.delete<void>(`/api/tables/${id}`).then((r) => r.data),
 }

@@ -1,0 +1,2 @@
+ALTER TABLE tables
+ADD COLUMN number INTEGER;

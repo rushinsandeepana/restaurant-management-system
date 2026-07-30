@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { cn } from '@/utils/cn'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Fragment, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 export interface TableColumn<T> {
@@ -29,6 +29,9 @@ interface TableProps<T> {
   emptyMessage?: string
   pagination?: PaginationProps
   className?: string
+  expandedRow?: (row: T) => ReactNode
+  expandedRowId?: string | number | null
+  onExpandedRowIdChange?: (rowKey: string | number | null) => void
 }
 
 export function Table<T>({
@@ -40,8 +43,26 @@ export function Table<T>({
   emptyMessage,
   pagination,
   className,
+  expandedRow,
+  expandedRowId,
+  onExpandedRowIdChange,
 }: TableProps<T>) {
   const { t } = useTranslation()
+  const [internalExpandedRowId, setInternalExpandedRowId] = useState<string | number | null>(null)
+  const controlled = expandedRowId !== undefined
+  const actualExpandedRowId = controlled ? expandedRowId : internalExpandedRowId
+  const hasExpandableRows = Boolean(expandedRow)
+  const columnsCount = columns.length + (hasExpandableRows ? 1 : 0)
+
+  const toggleExpandedRow = (rowKeyValue: string | number) => {
+    const nextRowKey = actualExpandedRowId === rowKeyValue ? null : rowKeyValue
+    if (!controlled) {
+      setInternalExpandedRowId(nextRowKey)
+    }
+    if (onExpandedRowIdChange) {
+      onExpandedRowIdChange(nextRowKey)
+    }
+  }
 
   const showPlaceholder = loading || !!error || data.length === 0
 
@@ -51,6 +72,9 @@ export function Table<T>({
         <table className="w-full min-w-full text-left text-sm border-collapse">
           <thead>
             <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              {hasExpandableRows && (
+                <th className="w-12 px-3 py-3" />
+              )}
               {columns.map((col) => (
                 <th
                   key={col.key}
@@ -64,7 +88,7 @@ export function Table<T>({
           <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
             {showPlaceholder ? (
               <tr>
-                <td colSpan={columns.length} className="px-3 py-8 text-center">
+                <td colSpan={columnsCount} className="px-3 py-8 text-center">
                   {loading ? (
                     <div className="flex justify-center py-8">
                       <Spinner />
@@ -79,21 +103,48 @@ export function Table<T>({
                 </td>
               </tr>
             ) : (
-              data.map((row) => (
-                <tr
-                  key={rowKey(row)}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={cn('px-3 py-3 text-gray-600 dark:text-gray-300', col.className)}
+              data.map((row) => {
+                const rowId = rowKey(row)
+                const isExpanded = actualExpandedRowId === rowId
+
+                return (
+                  <Fragment key={rowId}>
+                    <tr
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                     >
-                      {col.cell ? col.cell(row) : (row[col.key as keyof T] as ReactNode)}
-                    </td>
-                  ))}
-                </tr>
-              ))
+                      {hasExpandableRows && (
+                        <td className="px-3 py-3 text-gray-600 dark:text-gray-300">
+                          <button
+                            type="button"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                            onClick={() => toggleExpandedRow(rowId)}
+                            aria-label={isExpanded ? t('common.collapseRow', { defaultValue: 'Collapse row' }) : t('common.expandRow', { defaultValue: 'Expand row' })}
+                          >
+                            <ChevronDown className={cn('h-4 w-4 transition-transform', isExpanded ? 'rotate-180' : 'rotate-0')} />
+                          </button>
+                        </td>
+                      )}
+
+                      {columns.map((col) => (
+                        <td
+                          key={col.key}
+                          className={cn('px-3 py-3 text-gray-600 dark:text-gray-300', col.className)}
+                        >
+                          {col.cell ? col.cell(row) : (row[col.key as keyof T] as ReactNode)}
+                        </td>
+                      ))}
+                    </tr>
+
+                    {isExpanded && expandedRow ? (
+                      <tr className="bg-gray-50 dark:bg-gray-950">
+                        <td colSpan={columnsCount} className="px-3 py-3">
+                          {expandedRow(row)}
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                )
+              })
             )}
           </tbody>
         </table>

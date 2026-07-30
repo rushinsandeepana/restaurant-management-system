@@ -175,6 +175,8 @@
     "pageInfo": "Page {{current}} of {{total}}",
     "previous": "Previous",
     "next": "Next",
+    "edit": "Edit",
+    "delete": "Delete",
     "columns": {
       "image": "Image",
       "id": "Id",

@@ -3,7 +3,7 @@ import { Modal } from '@/components/ui/Modal'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import { tableApi, type TableStatus } from '@/api/tableApi'
+import { tableApi, type TableStatus, type Table } from '@/api/tableApi'
 import { FormSelect } from '@/components/ui/Input/Select'
 
 // ─── Status options ──────────────────────────────────────────────────────────
@@ -21,12 +21,19 @@ interface AddTableModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  // List of all existing tables — used to determine occupied numbers
+  useTables: Table[]
+  // If provided, the modal will open in edit mode for this table
+  initialTable?: Table | null
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
-export function AddTableModal({ isOpen, onClose, onSuccess }: AddTableModalProps) {
+export function AddTableModal({ isOpen, onClose, onSuccess, useTables, initialTable }: AddTableModalProps) {
   const { t } = useTranslation()
   const [selectedTable, setSelectedTable] = useState<number | null>(null)
+
+  const tables = useTables ?? []
+  const initialNumber = initialTable?.number ?? null
 
   const {
     register,
@@ -52,6 +59,19 @@ export function AddTableModal({ isOpen, onClose, onSuccess }: AddTableModalProps
     }
   }, [isOpen, reset])
 
+  // Initialize form when opening for edit
+  useEffect(() => {
+    if (isOpen && initialTable) {
+      const timer = setTimeout(() => {
+        const num = initialNumber || 0
+        setSelectedTable(num)
+        setValue('tableNumber', num)
+        setValue('status', initialTable.status)
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, initialNumber, initialTable, setValue])
+
   const handleTableSelect = (num: number) => {
     setSelectedTable(num)
     setValue('tableNumber', num)
@@ -61,10 +81,19 @@ export function AddTableModal({ isOpen, onClose, onSuccess }: AddTableModalProps
 
   const onSubmit = async (data: TableFormData) => {
     if (!data.tableNumber) return
-    await tableApi.create({
-      name:   `Table ${data.tableNumber}`,
-      status: data.status,
-    })
+    if (initialTable) {
+      await tableApi.update(initialTable.id, {
+        name: `Table ${data.tableNumber}`,
+        number: data.tableNumber,
+        status: data.status,
+      })
+    } else {
+      await tableApi.create({
+        name:   `Table ${data.tableNumber}`,
+        number: data.tableNumber,
+        status: data.status,
+      })
+    }
     onSuccess()
     onClose()
   }
@@ -87,44 +116,18 @@ export function AddTableModal({ isOpen, onClose, onSuccess }: AddTableModalProps
           >
             {Array.from({ length: 30 }, (_, i) => i + 1).map((num) => {
               const isSelected = selectedTable === num
+              const isOccupied = tables.some(table => table.number === num);
+              const disabled = isOccupied && initialNumber !== num;
+
+
               return (
                 <button
                   key={num}
                   type="button"
-                  onClick={() => handleTableSelect(num)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '8px',
-                    border: isSelected
-                      ? '2px solid var(--color-primary, #f97316)'
-                      : '2px solid #e5e7eb',
-                    backgroundColor: isSelected
-                      ? 'var(--color-primary, #f97316)'
-                      : 'transparent',
-                    color: isSelected ? '#fff' : 'inherit',
-                    fontWeight: 600,
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) {
-                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#fff7ed'
-                      ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#f97316'
-                      ;(e.currentTarget as HTMLButtonElement).style.color = '#f97316'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) {
-                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent'
-                      ;(e.currentTarget as HTMLButtonElement).style.borderColor = '#e5e7eb'
-                      ;(e.currentTarget as HTMLButtonElement).style.color = 'inherit'
-                    }
-                  }}
+                  onClick={() => !disabled && handleTableSelect(num)}
+                  disabled={disabled}
+                  aria-pressed={isSelected}
+                  className={`inline-flex items-center justify-center w-9 h-9 rounded-lg font-semibold text-sm transition-all ${isSelected ? 'border-2 border-orange-500 bg-orange-500 text-black' : 'border-2 border-gray-200 bg-transparent text-inherit'} ${disabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-amber-50 hover:border-amber-400 cursor-pointer'}`}
                 >
                   {num}
                 </button>

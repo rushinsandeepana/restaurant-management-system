@@ -10,3 +10,11 @@ logging:
   level:
     com.rms: DEBUG
     org.springframework.security: INFO
+    org.springframework.boot.context.config: DEBUG
+    com.zaxxer.hikari: DEBUG
+
+rms:
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://127.0.0.1:5173

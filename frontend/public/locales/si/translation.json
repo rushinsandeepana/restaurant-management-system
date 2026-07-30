@@ -121,6 +121,8 @@
     "pageInfo": "පිටුව {{current}} / {{total}}",
     "previous": "පෙර",
     "next": "ඊළඟ",
+    "edit": "සංස්කරණය",
+    "delete": "මකන්න",
     "columns": {
       "image": "රූපය",
       "id": "අයිඩී",
