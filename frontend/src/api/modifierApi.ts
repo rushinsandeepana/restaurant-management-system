@@ -21,4 +21,7 @@ export const modifierApi = {
 
   create: (body: CreateModifierRequest) =>
     apiClient.post<Modifier>('/api/modifiers', body).then((r) => r.data),
+  update: (id: number, body: CreateModifierRequest) =>
+      apiClient.put<Modifier>(`/api/modifiers/${id}`, body).then((r) => r.data),
+    delete: (id: number) => apiClient.delete<void>(`/api/modifiers/${id}`).then((r) => r.data),
 }

@@ -1,9 +1,9 @@
 package com.rms.controller;
 
-import com.rms.dto.Meal.CreateMealRequest;
-import com.rms.dto.Meal.MealResponse;
-import com.rms.dto.Meal.UpdateMealRequest;
-import com.rms.service.MealService;
+import com.rms.dto.Modifier.CreateModifierRequest;
+import com.rms.dto.Modifier.ModifierResponse;
+import com.rms.dto.Modifier.UpdateModifierRequest;
+import com.rms.service.ModifierService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,47 +16,55 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/meals")
+@RequestMapping("/api/modifiers")
 @RequiredArgsConstructor
-public class MealController {
+public class ModifierController {
 
-    private final MealService mealService;
+    private final ModifierService modifierService;
 
+    // GET /api/modifiers?search=&page=0&size=10
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_CASHIER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<Page<MealResponse>> getMeals(
+    public ResponseEntity<Page<ModifierResponse>> getModifiers(
             @RequestParam(required = false) String search,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(mealService.findMeals(search, pageable));
+        return ResponseEntity.ok(modifierService.findModifiers(search, pageable));
     }
 
+    // GET /api/modifiers/{id}
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_CASHIER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<MealResponse> getMeal(@PathVariable Long id) {
-        return ResponseEntity.ok(mealService.findById(id));
+    public ResponseEntity<ModifierResponse> getModifier(@PathVariable Long id) {
+        return ResponseEntity.ok(modifierService.findById(id));
     }
 
+    // POST /api/modifiers
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_CASHIER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<MealResponse> createMeal(@Valid @RequestBody CreateMealRequest request) {
+    public ResponseEntity<ModifierResponse> createModifier(
+            @Valid @RequestBody CreateModifierRequest request
+    ) {
+        
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(mealService.createMeal(request));
+                .body(modifierService.createModifier(request));
     }
 
+    // PUT /api/modifiers/{id}
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_CASHIER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<MealResponse> updateMeal(
+    public ResponseEntity<ModifierResponse> updateModifier(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateMealRequest request
+            @Valid @RequestBody UpdateModifierRequest request
     ) {
-        return ResponseEntity.ok(mealService.updateMeal(id, request));
+        return ResponseEntity.ok(modifierService.updateModifier(id, request));
     }
 
+    // DELETE /api/tables/{id}
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ROLE_CASHIER', 'ROLE_MANAGER', 'ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteMeal(@PathVariable Long id) {
-        mealService.deleteMeal(id);
+    public ResponseEntity<Void> deleteModifier(@PathVariable Long id) {
+        modifierService.deleteModifier(id);
         return ResponseEntity.noContent().build();
     }
 }

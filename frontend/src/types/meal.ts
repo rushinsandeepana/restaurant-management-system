@@ -1,36 +1,36 @@
 export interface MealVariation {
   id: number
   name: string
-  priceAdjustment: number
-  totalPrice: number
+  price: number
 }
 
 export interface Meal {
   id: number
   name: string
   imageUrl: string | null
-  quantity: number
+  categoryId: number
+  status: string
   basePrice: number
   totalPrice: number
   variations: MealVariation[]
+  modifierIds: number[]
   createdAt: string
 }
 
 export interface MealVariationInput {
   name: string
-  priceAdjustment: number
+  price: number
+  status: string
 }
 
 export interface CreateMealRequest {
   name: string
   imageUrl?: string
-  quantity: number
-  // basePrice: number
-  basePrices: {
-    size: string
-    price: number
-  }[]
-  variations?: MealVariationInput[]
+  categoryId: number
+  status: string
+  description?: string
+  variations: MealVariationInput[]
+  modifierIds: number[]
 }
 
 export interface PageResponse<T> {

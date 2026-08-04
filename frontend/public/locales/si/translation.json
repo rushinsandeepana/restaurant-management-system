@@ -40,6 +40,51 @@
     "search": "සොයන්න",
     "comingSoon": "ඉක්මනින් පැමිණේ"
   },
+  "meal": {
+    "title": "ආහාර වේල්",
+    "subtitle": "ආහාර වේල්, තොග ප්‍රමාණ, සහ මිල කළමනාකරණය කරන්න",
+    "addMeal": "ආහාර වේල් එකතු කරන්න",
+    "addVariation": "වෙනස්කම් එකතු කරන්න",
+    "noVariations": "තවම වෙනස්කම් එකතු කර නැත.",
+    "searchPlaceholder": "ආහාර වේල් නාමයෙන් සොයන්න...",
+    "totalItems": "{{count}} ආහාර වේල්",
+    "noMeals": "ආහාර වේල් හමු නොවීය",
+    "loadError": "ආහාර වේල් පූරණය කළ නොහැක",
+    "pageInfo": "පිටුව {{current}} / {{total}}",
+    "previous": "පෙර",
+    "next": "ඊළඟ",
+    "columns": {
+      "image": "රූපය",
+      "name": "නම",
+      "description": "විස්තරය",
+      "quantity": "ප්‍රමාණය",
+      "basePrice": "මූලික මිල",
+      "totalPrice": "මුළු මිල",
+      "createdAt": "සාදන ලද දිනය",
+      "status": "තත්ත්වය"
+    },
+    "fields": {
+      "name": "ආහාර වේල් නාමය",
+      "image": "ආහාර වේල් රූපය",
+      "category": "ප්‍රවර්ගය",
+      "status": "තත්ත්වය",
+      "description": "විස්තරය",
+      "quantity": "ප්‍රමාණය",
+      "basePrice": "මූලික මිල"
+    },
+    "errors": {
+      "nameRequired": "ආහාර වේල් නාමය අවශ්‍ය වේ",
+      "imageRequired": "ආහාර වේල් රූපය අවශ්‍ය වේ",
+      "descriptionRequired": "විස්තරය අවශ්‍ය වේ",
+      "quantityRequired": "ප්‍රමාණය අවශ්‍ය වේ",
+      "quantityMin": "ප්‍රමාණය අවම වශයෙන් 0 විය යුතුය",
+      "basePriceRequired": "මූලික මිල අවශ්‍ය වේ",
+      "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය",
+      "variationNameRequired": "වෙනස්කම් නාමය අවශ්‍ය වේ",
+      "variationPriceRequired": "වෙනස්කම් මිල අවශ්‍ය වේ",
+      "variationPriceMin": "වෙනස්කම් මිල 0 ට වඩා වැඩි විය යුතුය"
+    }
+  },
   "category": {
     "title": "ප්‍රවර්ගය",
     "subtitle": "ප්‍රවර්ග, තොග ප්‍රමාණ, සහ මිල කළමනාකරණය කරන්න",
@@ -63,6 +108,7 @@
     "fields": {
       "name": "ප්‍රවර්ග නාමය",
       "image": "ප්‍රවර්ග රූපය",
+      "slug": "Slug",
       "quantity": "ප්‍රමාණය",
       "basePrice": "මූලික මිල"
     },
@@ -72,7 +118,8 @@
       "quantityRequired": "ප්‍රමාණය අවශ්‍ය වේ",
       "quantityMin": "ප්‍රමාණය අවම වශයෙන් 0 විය යුතුය",
       "basePriceRequired": "මූලික මිල අවශ්‍ය වේ",
-      "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය"
+      "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය",
+      "slugRequired": "Slug අවශ්‍ය වේ"
     }
   },
   "modifier": {
@@ -87,11 +134,9 @@
     "previous": "පෙර",
     "next": "ඊළඟ",
     "columns": {
-      "image": "රූපය",
+      "id": "අයිඩී",
       "name": "නම",
-      "quantity": "ප්‍රමාණය",
       "basePrice": "මූලික මිල",
-      "totalPrice": "මුළු මිල",
       "createdAt": "සාදන ලද දිනය",
       "status": "තත්ත්වය"
     },
@@ -107,7 +152,8 @@
       "quantityRequired": "ප්‍රමාණය අවශ්ය වේ",
       "quantityMin": "ප්‍රමාණය අවම වශයෙන් 0 විය යුතුය",
       "basePriceRequired": "මූලික මිල අවශ්ය වේ",
-      "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය"
+      "basePriceMin": "මූලික මිල 0 ට වඩා වැඩි විය යුතුය",
+      "slugRequired": "Slug අවශ්ය වේ"
     }
   },
   "table": {

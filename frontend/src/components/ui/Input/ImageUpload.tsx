@@ -10,6 +10,7 @@ interface ImageUploadProps {
   value?: string
   onChange: (url: string) => void
   onRemove: () => void
+  onFileChange?: (file: File) => void
   previewAlt?: string
   required?: boolean
 }
@@ -21,10 +22,31 @@ export function ImageUpload({
   required,
   onChange,
   onRemove,
+  onFileChange,
   previewAlt = 'Preview',
 }: ImageUploadProps) {
   const [isDragActive, setIsDragActive] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith('image/')) return
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === 'string' ? reader.result : ''
+      onChange(dataUrl)
+    }
+
+    reader.onerror = () => {
+      console.error('Failed to read image file for preview')
+    }
+
+    reader.readAsDataURL(file)
+
+    // Optional real file callback
+    onFileChange?.(file)
+  }
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
@@ -39,23 +61,28 @@ export function ImageUpload({
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     setIsDragActive(false)
-    if (e.dataTransfer.files?.[0]) {
-      const file = e.dataTransfer.files[0]
-      if (file.type.startsWith('image/')) {
-        onChange(URL.createObjectURL(file))
-      }
+
+    const file = e.dataTransfer.files?.[0]
+
+    if (file) {
+      handleFile(file)
     }
   }
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) {
-      onChange(URL.createObjectURL(e.target.files[0]))
+    const file = e.target.files?.[0]
+
+    if (file) {
+      handleFile(file)
     }
   }
 
   const handleRemove = () => {
     onRemove()
-    if (fileInputRef.current) fileInputRef.current.value = ''
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   return (
@@ -65,7 +92,7 @@ export function ImageUpload({
           {label}
           {required && (
             <span className="ml-1 text-red-500">
-            *
+              *
             </span>
           )}
         </label>
@@ -94,13 +121,21 @@ export function ImageUpload({
 
         {value ? (
           <div className="relative group w-full max-w-[200px] h-[150px] overflow-hidden rounded-lg shadow-sm border border-gray-100 dark:border-gray-800">
-            <img src={value} alt={previewAlt} className="w-full h-full object-cover" />
+            <img
+              src={value}
+              alt={previewAlt}
+              className="w-full h-full object-cover"
+            />
+
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity gap-2">
               <Button
                 type="button"
                 variant="danger"
                 size="sm"
-                onClick={(e) => { e.stopPropagation(); handleRemove() }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleRemove()
+                }}
               >
                 Delete
               </Button>
@@ -109,10 +144,12 @@ export function ImageUpload({
         ) : (
           <div className="flex flex-col items-center gap-2">
             <UploadCloud className="h-10 w-10 text-gray-400 dark:text-gray-500" />
+
             <div>
               <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Click to upload or drag & drop
               </p>
+
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 PNG, JPG, or WEBP up to 5MB
               </p>
@@ -121,7 +158,11 @@ export function ImageUpload({
         )}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

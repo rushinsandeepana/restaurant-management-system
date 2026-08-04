@@ -10,17 +10,13 @@ import { useEffect, useState } from 'react'
 import { Status, STATUS_OPTIONS, generateSlug } from '@/types/enums'
 import { FormSelect } from '@/components/ui/Input/Select'
 import { modifierApi } from '@/api/modifierApi'
+import type { Modifier } from '@/types/category'
 
 const createSchema = (t: (key: string, options?: Record<string, unknown>) => string) =>
   z.object({
     name:        z.string().min(1, { message: t('modifier.errors.nameRequired') }),
     slug:        z.string().min(1, { message: t('modifier.errors.slugRequired') }),
-    description: z.string(),
     status:      z.nativeEnum(Status),
-    imageUrl:    z.string().min(1, { message: t('modifier.errors.imageRequired') }),
-    quantity:    z.number({ message: t('modifier.errors.quantityRequired') })
-                  .int()
-                  .min(0,  { message: t('modifier.errors.quantityMin') }),
     base_price: z.number({ message: t('modifier.errors.basePriceRequired') })
                   .positive({ message: t('modifier.errors.basePriceMin') }),
   })
@@ -31,9 +27,11 @@ interface AddModifierModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  initialModifier?: Modifier | null
+  useModifiers?: Modifier[]
 }
 
-export function AddModifierModal({ isOpen, onClose, onSuccess }: AddModifierModalProps) {
+export function AddModifierModal({ isOpen, onClose, onSuccess, initialModifier }: AddModifierModalProps) {
   const { t } = useTranslation()
   const [isSlugManuallyEdited, setIsSlugManually] = useState(false)  // ✅ only remaining state
 
@@ -51,14 +49,12 @@ export function AddModifierModal({ isOpen, onClose, onSuccess }: AddModifierModa
     defaultValues: {
       name:        '',
       slug:        '',
-      description: '',
       status:      Status.ACTIVE,
-      imageUrl:    '',
       base_price:  0,
     },
   })
 
-  // Auto-generate slug from name unless manually edited
+  // eslint-disable-next-line react-hooks/incompatible-library
   const nameValue = watch('name')
   useEffect(() => {
     if (!isSlugManuallyEdited) {
@@ -70,27 +66,50 @@ export function AddModifierModal({ isOpen, onClose, onSuccess }: AddModifierModa
     if (!isOpen) {
       const timer = setTimeout(() => {
         reset()
-        setIsSlugManually(false)  // ✅ removed setPreviewUrl — ImageUpload handles it internally
+        setIsSlugManually(false)
       }, 0)
       return () => clearTimeout(timer)
     }
   }, [isOpen, reset])
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    if (initialModifier) {
+      const timer = setTimeout(() => {
+        setIsSlugManually(false)
+        setValue('name', initialModifier.name)
+        setValue('slug', initialModifier.slug)
+        setValue('status', initialModifier.status)
+        setValue('base_price', initialModifier.base_price)
+      }, 0)
+
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, initialModifier, setValue])
+
   const close = () => onClose()
 
   const onSubmit = async (data: ModifierFormData) => {
-    await modifierApi.create({
-      name:        data.name,
-      slug:        data.slug,
-      description: data.description,
-      status:      data.status,
-      imageUrl:    data.imageUrl,
-      base_price:  data.base_price,
-    })
+    if (initialModifier) {
+      await modifierApi.update(initialModifier.id, {
+        name:       data.name,
+        slug:       data.slug,
+        status:     data.status,
+        base_price: data.base_price,
+      })
+    } else {
+      await modifierApi.create({
+        name:       data.name,
+        slug:       data.slug,
+        status:     data.status,
+        base_price: data.base_price,
+      })
+    }
+
     onSuccess()
     onClose()
   }
-
   return (
     <Modal isOpen={isOpen} onClose={close} title={t('modifier.addModifier')} size="lg">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -129,7 +148,9 @@ export function AddModifierModal({ isOpen, onClose, onSuccess }: AddModifierModa
             required
             type='number'
             error={errors.base_price?.message}
-            {...register('base_price')}
+            {...register('base_price', {
+              valueAsNumber: true,
+            })}
           />
           <FormSelect
             label={t('modifier.fields.status', 'Status')}

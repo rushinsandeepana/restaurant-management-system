@@ -1,47 +1,78 @@
 import { mealsApi } from '@/api/mealsApi'
+import { categoryApi } from '@/api/categoryApi'
+import { modifierApi } from '@/api/modifierApi'
 import { Button } from '@/components/ui/Button'
 import { FormInput } from '@/components/ui/Input'
+import { ImageUpload } from '@/components/ui/Input/ImageUpload'
+import { FormSelect } from '@/components/ui/Input/Select'
 import { Modal } from '@/components/ui/Modal'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, Trash2, UploadCloud } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
-import { useEffect, useRef, useState } from 'react'
-import type { ChangeEvent, DragEvent } from 'react'
+import { useEffect, useState } from 'react'
+import { Status, STATUS_OPTIONS } from '@/types/enums'
+import type { Category, Modifier } from '@/types/category'
 import { cn } from '@/utils/cn'
 
-interface FormData {
-  name: string
-  imageUrl: string
-  quantity: number
-  basePrices: {
-    size: string
-    price: number
-  }[]
-  variations: {
-    name: string
-    priceAdjustment: number
-  }[]
-}
+// ─── Enums ────────────────────────────────────────────────────────────────────
 
-const createSchema = (t: (key: string, options?: Record<string, unknown>) => string) => z.object({
-  name: z.string().min(1, { message: t('meal.errors.nameRequired') }),
-  imageUrl: z.string().min(1, { message: t('meal.errors.imageRequired') }),
-  quantity: z.number({ message: t('meal.errors.quantityRequired') }).int().min(0, { message: t('meal.errors.quantityMin') }),
-  basePrices: z.array(
-    z.object({
-      size: z.string().min(1, { message: t('meal.errors.sizeRequired') }),
-      price: z.number({ message: t('meal.errors.basePriceRequired') }).min(0.01, { message: t('meal.errors.basePriceMin') }),
-    })
-  ).min(1, { message: t('meal.errors.atLeastOneBasePrice') }),
-  variations: z.array(
-    z.object({
-      name: z.string().min(1, { message: t('meal.errors.variationNameRequired') }),
-      priceAdjustment: z.number({ message: t('meal.errors.priceAdjustmentRequired') }).min(0, { message: t('meal.errors.priceAdjustmentMin') }),
-    })
-  ).min(1, { message: t('meal.errors.atLeastOneVariation') }),
-})
+// eslint-disable-next-line react-refresh/only-export-components
+export const VariationSize = {
+  REGULAR:  'REGULAR',
+  STANDARD: 'STANDARD',
+  LARGE:    'LARGE',
+} as const
+
+export type VariationSize = typeof VariationSize[keyof typeof VariationSize]
+
+const VARIATION_SIZE_OPTIONS = [
+  { label: 'Regular',  value: VariationSize.REGULAR  },
+  { label: 'Standard', value: VariationSize.STANDARD },
+  { label: 'Large',    value: VariationSize.LARGE    },
+]
+
+const VARIATION_SIZE_VALUES = [
+  VariationSize.REGULAR,
+  VariationSize.STANDARD,
+  VariationSize.LARGE,
+] as const
+
+const STATUS_VALUES = [
+  Status.ACTIVE,
+  Status.INACTIVE,
+  Status.DRAFT,
+] as const
+
+// ─── Schema ───────────────────────────────────────────────────────────────────
+
+const createSchema = (t: (key: string, options?: Record<string, unknown>) => string) =>
+  z.object({
+    name:        z.string().min(1, { message: t('meal.errors.nameRequired') }),
+    categoryId:  z.string().min(1, { message: t('meal.errors.categoryRequired') }),
+    description: z.string(),
+    status:      z.enum(STATUS_VALUES),
+    imageUrl:    z.string().min(1, { message: t('meal.errors.imageRequired') }),
+    variations:  z
+      .array(
+        z.object({
+          name:   z.enum(VARIATION_SIZE_VALUES, {
+            message: t('meal.errors.variationNameRequired'),
+          }),
+          price:  z
+            .number({ message: t('meal.errors.priceRequired') })
+            .min(0, { message: t('meal.errors.priceMin') }),
+          status: z.enum(STATUS_VALUES),
+        })
+      )
+      .min(1, { message: t('meal.errors.atLeastOneVariation') }),
+    modifierIds: z.array(z.number()),
+  })
+
+type MealFormData = z.infer<ReturnType<typeof createSchema>>
+
+// ─── Props ────────────────────────────────────────────────────────────────────
 
 interface AddMealModalProps {
   isOpen: boolean
@@ -49,11 +80,15 @@ interface AddMealModalProps {
   onSuccess: () => void
 }
 
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) {
   const { t } = useTranslation()
-  const [isDragActive, setIsDragActive] = useState(false)
-  const [previewUrl, setPreviewUrl] = useState<string>('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [categories,  setCategories]  = useState<Category[]>([])
+  const [modifiers,   setModifiers]   = useState<Modifier[]>([])
+  const [loadingMeta, setLoadingMeta] = useState(false)
+  const [, setImageFile] = useState<File | null>(null)
 
   const schema = createSchema(t)
 
@@ -63,319 +98,323 @@ export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) 
     handleSubmit,
     reset,
     setValue,
+    watch,
     trigger,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({
+  } = useForm<MealFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      name: '',
-      imageUrl: '',
-      quantity: 0,
-      basePrices: [],
-      variations: [],
+      name:        '',
+      categoryId:  '',
+      description: '',
+      status:      Status.ACTIVE,
+      imageUrl:    '',
+      variations:  [],
+      modifierIds: [],
     },
   })
 
-  const { fields: basePriceFields, append: appendBasePrice, remove: removeBasePrice } = useFieldArray({ 
-    control, 
-    name: 'basePrices' 
-  })
-  const { fields: variationFields, append: appendVariation, remove: removeVariation } = useFieldArray({ 
-    control, 
-    name: 'variations' 
-  })
+  const {
+    fields: variationFields,
+    append: appendVariation,
+    remove: removeVariation,
+  } = useFieldArray({ control, name: 'variations' })
 
-  // Clean up states asynchronously when modal is closed
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const watchedModifierIds = watch('modifierIds')
+
+  // Load categories & modifiers once on open
+  useEffect(() => {
+    if (!isOpen) return
+
+    setLoadingMeta(true)
+
+    Promise.all([
+      categoryApi.getPage({ size: 100 }),
+      modifierApi.getPage({ size: 100 }),
+    ])
+      .then(([catData, modData]) => {
+        const activeCategories = catData.content.filter(
+          (category) => category.status === 'ACTIVE'
+        )
+        const activeModifiers = modData.content.filter(
+          (modifier) => modifier.status === 'ACTIVE'
+        )
+        
+        setCategories(activeCategories)
+        setModifiers(activeModifiers)
+      })
+      .catch((error) => {
+        console.error('MEAL META ERROR:', error)
+      })
+      .finally(() => {
+        setLoadingMeta(false)
+      })
+  }, [isOpen])
+
+  // Reset form on close
   useEffect(() => {
     if (!isOpen) {
-      const timer = setTimeout(() => {
-        reset()
-        setPreviewUrl('')
-      }, 0)
+      const timer = setTimeout(() => reset(), 0)
       return () => clearTimeout(timer)
     }
   }, [isOpen, reset])
 
-  const close = () => {
-    onClose()
-  }
+  const close = () => onClose()
 
-  const onSubmit = async (data: FormData) => {
-    console.log("data", data);
+  const onSubmit = async (data: MealFormData) => {
     await mealsApi.create({
-      name: data.name,
-      imageUrl: data.imageUrl,
-      quantity: data.quantity,
-      basePrices: data.basePrices,
-      variations: data.variations.length > 0 ? data.variations : undefined,
+      name:        data.name,
+      imageUrl:    data.imageUrl,
+      categoryId:  Number(data.categoryId),
+      status:      data.status,
+      description: data.description,
+      variations:  data.variations,
+      modifierIds: data.modifierIds,
     })
     onSuccess()
     onClose()
   }
-  
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragActive(true)
-  }
-
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragActive(false)
-  }
-
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    setIsDragActive(false)
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0]
-      if (file.type.startsWith('image/')) {
-        const url = URL.createObjectURL(file)
-        setPreviewUrl(url)
-        setValue('imageUrl', url)
-        trigger('imageUrl')
-      }
+  // Toggle modifier selection
+  const toggleModifier = (id: number) => {
+    const current = watchedModifierIds ?? []
+    if (current.includes(id)) {
+      setValue('modifierIds', current.filter((m) => m !== id))
+    } else {
+      setValue('modifierIds', [...current, id])
     }
   }
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
-      setValue('imageUrl', url)
-      trigger('imageUrl')
-    }
-  }
-
-  const triggerFileSelect = () => {
-    fileInputRef.current?.click()
-  }
-
-  const removeImage = () => {
-    setPreviewUrl('')
-    setValue('imageUrl', '')
-    trigger('imageUrl')
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
+  const categoryOptions = [
+    { label: 'Select a category…', value: '' },
+    ...categories.map((c) => ({ label: c.name, value: String(c.id) })),
+  ]
 
   return (
-    <Modal isOpen={isOpen} onClose={close} title={t('meal.addMeal')} size="lg">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-1">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('meal.fields.image')}
-          </label>
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={triggerFileSelect}
-            className={cn(
-              'relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center cursor-pointer transition-all min-h-[160px]',
-              isDragActive
-                ? 'border-orange-500 bg-orange-500/5 dark:border-orange-400 dark:bg-orange-400/5'
-                : 'border-gray-300 bg-white hover:border-orange-500/50 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-orange-400/50',
-              errors.imageUrl && 'border-red-500 hover:border-red-500/80 dark:border-red-500'
-            )}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
+    <Modal isOpen={isOpen} onClose={close} title={t('meal.addMeal')} size="xl">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* ── Two-column layout ─────────────────────────────────────────────── */}
+        <div className="flex gap-6">
+
+          {/* ── LEFT: Main Fields ─────────────────────────────────────────── */}
+          <div className="flex-1 min-w-0 space-y-4">
+
+            {/* Name + Category */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormInput
+                label={t('meal.fields.name')}
+                required
+                placeholder={t('meal.placeholders.name', 'Enter meal name')}
+                error={errors.name?.message}
+                {...register('name')}
+              />
+              <FormSelect
+                label={t('meal.fields.category')}
+                required
+                options={categoryOptions}
+                error={errors.categoryId?.message}
+                disabled={loadingMeta}
+                {...register('categoryId')}
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {t('meal.fields.description', 'Description')}
+                <span className="ml-1 text-red-500">*</span>
+              </label>
+              <textarea
+                rows={4}
+                placeholder={t('meal.placeholders.description', 'Enter meal description…')}
+                className={cn(
+                  'w-full rounded-lg border px-3 py-2 text-sm transition-colors resize-none',
+                  'border-gray-300 bg-white text-gray-900 placeholder-gray-400',
+                  'dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-500',
+                  'focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-500',
+                  'dark:focus:border-orange-400 dark:focus:ring-orange-400/40'
+                )}
+                {...register('description')}
+              />
+            </div>
+
+            {/* Status */}
+            <FormSelect
+              label={t('meal.fields.status', 'Status')}
+              required
+              options={STATUS_OPTIONS}
+              error={errors.status?.message}
+              {...register('status')}
             />
 
-            {previewUrl ? (
-              <div className="relative group w-full max-w-[200px] h-[150px] overflow-hidden rounded-lg shadow-sm border border-gray-100 dark:border-gray-800">
-                <img
-                  src={previewUrl}
-                  alt="Meal preview"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity gap-2">
-                  <Button
-                    type="button"
-                    variant="danger"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removeImage()
-                    }}
-                  >
-                    {t('common.delete')}
-                  </Button>
+            {/* ── Variations ──────────────────────────────────────────────── */}
+            <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {t('meal.fields.variations', 'Variations')}
+                </span>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  icon={<Plus className="h-3.5 w-3.5" />}
+                  onClick={() => appendVariation({ name: VariationSize.STANDARD, price: 0, status: Status.ACTIVE })}
+                >
+                  {t('meal.addVariation', 'Add variation')}
+                </Button>
+              </div>
+
+              {/* Column headers */}
+              {variationFields.length > 0 && (
+                <div className="grid grid-cols-[1fr_120px_130px_auto] gap-0 px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Name</span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                    Price <span className="text-red-400">*</span>
+                  </span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Status</span>
+                  <span />
                 </div>
+              )}
+
+              {/* Empty state */}
+              {variationFields.length === 0 && (
+                <p className="px-4 py-6 text-sm text-center text-gray-400 dark:text-gray-500">
+                  {t('meal.noVariations', 'No variations yet. Click "Add variation" to begin.')}
+                </p>
+              )}
+
+              {/* Variation rows */}
+              <div className="divide-y divide-gray-100 dark:divide-gray-800  max-h-32 overflow-y-auto">
+                {variationFields.map((field, index) => (
+                  <div key={field.id} className="px-4 py-3 bg-white dark:bg-gray-900">
+                    <div className="grid grid-cols-[1fr_120px_130px_auto] gap-2 items-start">
+                      {/* Name dropdown */}
+                      <FormSelect
+                        options={VARIATION_SIZE_OPTIONS}
+                        error={errors.variations?.[index]?.name?.message}
+                        {...register(`variations.${index}.name`)}
+                      />
+
+                      {/* Price */}
+                      <FormInput
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        placeholder={t('meal.placeholders.price', '0.00')}
+                        error={errors.variations?.[index]?.price?.message}
+                        {...register(`variations.${index}.price`, { valueAsNumber: true })}
+                      />
+
+                      {/* Status */}
+                      <FormSelect
+                        options={STATUS_OPTIONS}
+                        error={errors.variations?.[index]?.status?.message}
+                        {...register(`variations.${index}.status`)}
+                      />
+
+                      {/* Remove */}
+                      <button
+                        type="button"
+                        onClick={() => removeVariation(index)}
+                        className="mt-1 text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 whitespace-nowrap transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2">
-                <UploadCloud className="h-10 w-10 text-gray-400 dark:text-gray-500" />
-                <div>
-                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Click to upload or drag & drop
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    PNG, JPG, or WEBP up to 5MB
+
+              {errors.variations?.message && (
+                <p className="px-4 pb-3 text-sm text-red-600">{errors.variations.message}</p>
+              )}
+            </div>
+          </div>
+
+          {/* ── RIGHT: Sidebar ────────────────────────────────────────────── */}
+          <div className="w-64 shrink-0 space-y-4">
+
+            {/* Image */}
+            <ImageUpload
+              label={t('meal.fields.image', 'Image')}
+              error={errors.imageUrl?.message}
+              value={watch('imageUrl')}
+              previewAlt="Meal preview"
+              onChange={(url) => {
+                setValue('imageUrl', url)
+                trigger('imageUrl')
+              }}
+              onFileChange={(file) => {
+                setImageFile(file)
+              }}
+              onRemove={() => {
+                setImageFile(null)
+                setValue('imageUrl', '')
+                trigger('imageUrl')
+              }}
+            />
+
+            {/* Modifiers */}
+            <div className="rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {t('meal.fields.modifiers', 'Modifiers')}
+                </span>
+              </div>
+
+              {loadingMeta && (
+                <p className="px-4 py-3 text-sm text-gray-400 dark:text-gray-500">Loading…</p>
+              )}
+
+              {!loadingMeta && modifiers.length === 0 && (
+                <p className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                  {t('meal.noModifiers', 'No modifiers available.')}
+                </p>
+              )}
+
+              {!loadingMeta && modifiers.length > 0 && (
+                <div className="divide-y divide-gray-100 dark:divide-gray-800 max-h-48 overflow-y-auto">
+                  {modifiers.map((modifier) => {
+                    const isChecked = (watchedModifierIds ?? []).includes(modifier.id)
+                    return (
+                      <label
+                        key={modifier.id}
+                        className={cn(
+                          'flex items-center gap-3 px-4 py-2.5 cursor-pointer select-none transition-colors',
+                          'hover:bg-gray-50 dark:hover:bg-gray-800/60',
+                          isChecked && 'bg-orange-50 dark:bg-orange-900/20'
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleModifier(modifier.id)}
+                          className="h-4 w-4 rounded border-gray-300 accent-orange-500 focus:ring-orange-500/40 dark:border-gray-600"
+                        />
+                        <span className="flex-1 text-sm text-gray-800 dark:text-gray-200">
+                          {modifier.name}
+                        </span>
+                      </label>
+                    )
+                  })}
+                </div>
+              )}
+
+              {(watchedModifierIds ?? []).length > 0 && (
+                <div className="px-4 py-2 bg-orange-50 dark:bg-orange-900/10 border-t border-orange-100 dark:border-orange-900/30">
+                  <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                    {(watchedModifierIds ?? []).length} selected
                   </p>
                 </div>
-              </div>
-            )}
-          </div>
-          {errors.imageUrl?.message && (
-            <p className="text-sm text-red-600">{errors.imageUrl.message}</p>
-          )}
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormInput
-            label={t('meal.fields.name')}
-            required
-            error={errors.name?.message}
-            {...register('name')}
-          />
-          <FormInput
-            label={t('meal.fields.quantity')}
-            required
-            type="number"
-            min={0}
-            error={errors.quantity?.message}
-            {...register('quantity', { valueAsNumber: true })}
-          />
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('meal.fields.basePrices')}
-              <span className="ml-1 text-red-500">
-                *
-              </span>
-            </h3>
-            
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              icon={<Plus className="h-4 w-4" />}
-              onClick={() => appendBasePrice({ size: '', price: 0 })}
-            >
-              {t('meal.addPrice')}
-            </Button>
-          </div>
-
-          {basePriceFields.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('meal.noBasePrices')}
-            </p>
-          )}
-
-          {basePriceFields.map((field, index) => (
-            <div key={field.id} className="flex items-end gap-2">
-              <div className="flex-1">
-                <FormInput
-                  label={t('meal.fields.size')}
-                  placeholder={t('meal.placeholders.size')}
-                  required
-                  error={errors.basePrices?.[index]?.size?.message}
-                  {...register(`basePrices.${index}.size`)}
-                />
-              </div>
-              <div className="w-36">
-                <FormInput
-                  label={t('meal.fields.price')}
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  placeholder="0.00"
-                  required
-                  error={errors.basePrices?.[index]?.price?.message}
-                  {...register(`basePrices.${index}.price`, { valueAsNumber: true })}
-                />
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                aria-label={t('common.delete')}
-                onClick={() => removeBasePrice(index)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
+              )}
             </div>
-          ))}
-
-          {errors.basePrices?.message && (
-            <p className="text-sm text-red-600">{errors.basePrices.message}</p>
-          )}
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('meal.fields.variations')}
-              <span className="ml-1 text-red-500">
-                *
-              </span>
-            </h3>
-            
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              icon={<Plus className="h-4 w-4" />}
-              onClick={() => appendVariation({ name: '', priceAdjustment: 0 })}
-            >
-              {t('meal.addVariation')}
-            </Button>
           </div>
-
-          {variationFields.length === 0 && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t('meal.noVariations')}
-            </p>
-          )}
-
-          {variationFields.map((field, index) => (
-            <div key={field.id} className="flex items-end gap-2">
-              <div className="flex-1">
-                <FormInput
-                  label={t('meal.fields.variationName')}
-                  required
-                  error={errors.variations?.[index]?.name?.message}
-                  {...register(`variations.${index}.name`)}
-                />
-              </div>
-              <div className="w-36">
-                <FormInput
-                  label={t('meal.fields.priceAdjustment')}
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  error={errors.variations?.[index]?.priceAdjustment?.message}
-                  {...register(`variations.${index}.priceAdjustment`, { valueAsNumber: true })}
-                />
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                aria-label={t('common.delete')}
-                onClick={() => removeVariation(index)}
-              >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
-            </div>
-          ))}
-
-          {errors.variations?.message && (
-            <p className="text-sm text-red-600">{errors.variations.message}</p>
-          )}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-gray-100 pt-4 dark:border-gray-800">
+        {/* ── Actions ─────────────────────────────────────────────────────────── */}
+        <div className="flex justify-end gap-2 border-t border-gray-100 pt-4 mt-5 dark:border-gray-800">
           <Button type="button" variant="secondary" onClick={close}>
             {t('common.cancel')}
           </Button>

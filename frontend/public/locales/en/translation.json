@@ -75,11 +75,19 @@
     "fields": {
       "name": "Meal name",
       "image": "Meal image",
+      "category": "Category",
+      "status": "Status",
+      "description": "Description",
       "quantity": "Quantity",
       "basePrice": "Base price",
       "variations": "Variations",
       "variationName": "Variation name",
       "priceAdjustment": "Extra price"
+    },
+    "placeholders": {
+      "name": "Enter meal name",
+      "description": "Enter meal description...",
+      "price": "0.00"
     },
     "errors": {
       "nameRequired": "Meal name is required",
@@ -118,7 +126,8 @@
       "name": "Category name",
       "image": "Category image",
       "quantity": "Quantity",
-      "basePrice": "Base price"
+      "basePrice": "Base price",
+      "slug": "Slug"
     },
     "errors": {
       "nameRequired": "Category name is required",
@@ -126,7 +135,8 @@
       "quantityRequired": "Quantity is required",
       "quantityMin": "Quantity must be at least 0",
       "basePriceRequired": "Base price is required",
-      "basePriceMin": "Base price must be greater than 0"
+      "basePriceMin": "Base price must be greater than 0",
+      "slugRequired": "Slug is required"
     }
   },
   "modifier": {
@@ -141,11 +151,9 @@
     "previous": "Previous",
     "next": "Next",
     "columns": {
-      "image": "Image",
+      "id": "Id",
       "name": "Name",
-      "quantity": "Quantity",
       "basePrice": "Base price",
-      "totalPrice": "Total price",
       "createdAt": "Created",
       "status": "Status"
     },
@@ -161,7 +169,8 @@
       "quantityRequired": "Quantity is required",
       "quantityMin": "Quantity must be at least 0",
       "basePriceRequired": "Base price is required",
-      "basePriceMin": "Base price must be greater than 0"
+      "basePriceMin": "Base price must be greater than 0",
+      "slugRequired": "Slug is required"
     }
   },
   "table": {

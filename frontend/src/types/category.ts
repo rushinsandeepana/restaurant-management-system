@@ -35,10 +35,8 @@ export interface Modifier {
   id: number
   name: string
   slug: string
-  description: string
   status: Status
-  imageUrl: string
-  quantity: number
+  base_price: number
   createdAt: string
   updatedAt: string
 }
@@ -46,8 +44,6 @@ export interface Modifier {
 export interface CreateModifierRequest {
   name: string
   slug: string
-  description: string
   status: Status
-  imageUrl: string
   base_price: number
 }

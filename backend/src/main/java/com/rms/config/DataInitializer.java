@@ -1,6 +1,8 @@
 package com.rms.config;
 
 import com.rms.domain.*;
+import com.rms.domain.enums.Status;
+import com.rms.repository.CategoryRepository;
 import com.rms.repository.MealRepository;
 import com.rms.repository.OrderRepository;
 import com.rms.repository.UserRepository;
@@ -23,6 +25,7 @@ public class DataInitializer {
     CommandLineRunner seedDevData(
             UserRepository userRepository,
             OrderRepository orderRepository,
+            CategoryRepository categoryRepository,
             MealRepository mealRepository,
             PasswordEncoder passwordEncoder
     ) {
@@ -32,7 +35,8 @@ public class DataInitializer {
             seedUser(userRepository, passwordEncoder,
                     "kitchen@rms.local", "Kitchen@123", "Kitchen Staff", Role.CHEF);
 
-            seedMeals(mealRepository);
+            seedCategories(categoryRepository);
+            seedMeals(categoryRepository, mealRepository);
 
             if (orderRepository.count() > 0) {
                 return;
@@ -77,40 +81,76 @@ public class DataInitializer {
         };
     }
 
-    private void seedMeals(MealRepository mealRepository) {
+    private void seedCategories(CategoryRepository categoryRepository) {
+        if (categoryRepository.count() > 0) {
+            return;
+        }
+
+        categoryRepository.saveAll(List.of(
+                Category.builder()
+                        .name("Main Course")
+                        .slug("main-course")
+                        .description("Signature mains")
+                        .status(Status.ACTIVE)
+                        .imageUrl("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=200&h=200&fit=crop")
+                        .build(),
+                Category.builder()
+                        .name("Beverages")
+                        .slug("beverages")
+                        .description("Cold and hot drinks")
+                        .status(Status.ACTIVE)
+                        .imageUrl("https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=200&h=200&fit=crop")
+                        .build()
+        ));
+    }
+
+    private void seedMeals(CategoryRepository categoryRepository, MealRepository mealRepository) {
         if (mealRepository.count() > 0) {
             return;
         }
 
+        Category mainCourse = categoryRepository.findAll().stream()
+                .filter(category -> "main-course".equals(category.getSlug()))
+                .findFirst()
+                .orElseThrow();
+
+        Category beverages = categoryRepository.findAll().stream()
+                .filter(category -> "beverages".equals(category.getSlug()))
+                .findFirst()
+                .orElseThrow();
+
         Meal kottu = Meal.builder()
                 .name("Chicken Kottu")
                 .imageUrl("https://images.unsplash.com/photo-1603133872878-684f208fb589?w=200&h=200&fit=crop")
-                .quantity(45)
-                .basePrice(new BigDecimal("12.50"))
+                .category(mainCourse)
+                .status(Status.ACTIVE)
+                .description("Street-style chicken kottu with fresh vegetables")
                 .build();
         kottu.setVariations(List.of(
-                MealVariation.builder().name("Regular").priceAdjustment(BigDecimal.ZERO).build(),
-                MealVariation.builder().name("Extra Egg").priceAdjustment(new BigDecimal("2.00")).build(),
-                MealVariation.builder().name("Double Meat").priceAdjustment(new BigDecimal("4.50")).build()
+                MealVariation.builder().name("Regular").price(BigDecimal.ZERO).status(Status.ACTIVE).build(),
+                MealVariation.builder().name("Extra Egg").price(new BigDecimal("2.00")).status(Status.ACTIVE).build(),
+                MealVariation.builder().name("Double Meat").price(new BigDecimal("4.50")).status(Status.ACTIVE).build()
         ));
 
         Meal friedRice = Meal.builder()
                 .name("Fried Rice")
                 .imageUrl("https://images.unsplash.com/photo-1512058564366-78c7e7a64312?w=200&h=200&fit=crop")
-                .quantity(30)
-                .basePrice(new BigDecimal("9.00"))
+                .category(mainCourse)
+                .status(Status.ACTIVE)
+                .description("Classic fried rice with aromatic seasoning")
                 .build();
         friedRice.setVariations(List.of(
-                MealVariation.builder().name("Vegetable").priceAdjustment(BigDecimal.ZERO).build(),
-                MealVariation.builder().name("Chicken").priceAdjustment(new BigDecimal("3.00")).build(),
-                MealVariation.builder().name("Seafood").priceAdjustment(new BigDecimal("5.00")).build()
+                MealVariation.builder().name("Vegetable").price(BigDecimal.ZERO).status(Status.ACTIVE).build(),
+                MealVariation.builder().name("Chicken").price(new BigDecimal("3.00")).status(Status.ACTIVE).build(),
+                MealVariation.builder().name("Seafood").price(new BigDecimal("5.00")).status(Status.ACTIVE).build()
         ));
 
         Meal juice = Meal.builder()
                 .name("Mango Juice")
                 .imageUrl("https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=200&h=200&fit=crop")
-                .quantity(60)
-                .basePrice(new BigDecimal("3.00"))
+                .category(beverages)
+                .status(Status.ACTIVE)
+                .description("Refreshing mango juice")
                 .build();
 
         mealRepository.saveAll(List.of(kottu, friedRice, juice));

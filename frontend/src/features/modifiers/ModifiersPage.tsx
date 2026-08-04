@@ -1,14 +1,13 @@
-import { categoryApi } from '@/api/categoryApi'
 import { PageWrapper } from '@/components/layout/PageWrapper'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Table, type TableColumn } from '@/components/ui/Table'
-import { AddCategoryModal } from '@/features/categories/AddCategoryModel'
 import type { Modifier } from '@/types/category'
-import { Plus, Search, UtensilsCrossed } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AddModifierModal } from './AddModifiersModel'
+import { modifierApi } from '@/api/modifierApi'
 
 const PAGE_SIZE = 10
 
@@ -35,12 +34,14 @@ export function ModifierPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [expandedRowId, setExpandedRowId] = useState<string | number | null>(null)
+  const [editingModifier, setEditingModifier] = useState<Modifier | null>(null)
 
   const loadMeals = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const data = await categoryApi.getPage({ search, page, size: PAGE_SIZE })
+      const data = await modifierApi.getPage({ search, page, size: PAGE_SIZE })
       setModifiers(data.content)
       setTotalPages(data.totalPages)
       setTotalElements(data.totalElements)
@@ -66,27 +67,43 @@ export function ModifierPage() {
     return () => clearTimeout(timer)
   }, [searchInput])
 
-  const handleMealAdded = () => {
+  const handleModifierAdded = () => {
     setPage(0)
-    loadMeals()
+    void loadMeals()
+  }
+
+  const handleEdit = (modifier: Modifier) => {
+    setEditingModifier(modifier)
+    setModalOpen(true)
+  }
+
+  const handleDelete = (modifier: Modifier) => {
+    const doDelete = async () => {
+      if (!confirm(t('modifier.confirmDelete', { defaultValue: 'Are you sure you want to delete this modifier?' }))) return
+      try {
+        setLoading(true)
+        await modifierApi.delete(modifier.id)
+        if (expandedRowId === modifier.id) setExpandedRowId(null)
+        await loadMeals()
+      } catch (e) {
+        console.error('Failed to delete modifier', e)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void doDelete()
   }
 
   const columns: TableColumn<Modifier>[] = [
     {
-      header: t('modifier.columns.image'),
-      key: 'imageUrl',
-      cell: (modifier) =>
-        modifier.imageUrl ? (
-          <img
-            src={modifier.imageUrl}
-            alt={modifier.name}
-            className="h-12 w-12 rounded-lg object-cover"
-          />
-        ) : (
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800">
-            <UtensilsCrossed className="h-5 w-5 text-gray-400" />
-          </div>
-        ),
+      header: t('modifier.columns.id'),
+      key: 'id',
+      cell: (modifier) => (
+        <span className="font-medium text-gray-900 dark:text-white">
+          {modifier.id}
+        </span>
+      ),
     },
     {
       header: t('modifier.columns.name'),
@@ -94,6 +111,15 @@ export function ModifierPage() {
       cell: (modifier) => (
         <span className="font-medium text-gray-900 dark:text-white">
           {modifier.name}
+        </span>
+      ),
+    },
+    {
+      header: t('modifier.columns.basePrice'),
+      key: 'base_price',
+      cell: (modifier) => (
+        <span className="font-medium text-gray-900 dark:text-white">
+          {modifier.base_price}
         </span>
       ),
     },
@@ -157,13 +183,35 @@ export function ModifierPage() {
             totalElements,
             onPageChange: setPage,
           }}
+          expandedRowId={expandedRowId}
+          onExpandedRowIdChange={setExpandedRowId}
+          expandedRow={(table) => (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleEdit(table)}
+              >
+                {t('table.edit')}
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => handleDelete(table)}
+              >
+                {t('table.delete')}
+              </Button>
+            </div>
+          )}
         />
       </Card>
 
       <AddModifierModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSuccess={handleMealAdded}
+        onClose={() => { setModalOpen(false); setEditingModifier(null) }}
+        onSuccess={() => { handleModifierAdded(); setEditingModifier(null) }}
+        initialModifier={editingModifier}
+        useModifiers={modifiers}
       />
     </PageWrapper>
   )

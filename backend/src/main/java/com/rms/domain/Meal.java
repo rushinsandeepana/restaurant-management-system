@@ -1,14 +1,16 @@
 package com.rms.domain;
 
+import com.rms.domain.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "meals")
@@ -26,19 +28,33 @@ public class Meal {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "image_url", length = 512)
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private int quantity = 0;
+    private Status status = Status.ACTIVE;
 
-    @Column(name = "base_price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal basePrice;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<MealVariation> variations = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "meal_modifiers",
+            joinColumns = @JoinColumn(name = "meal_id"),
+            inverseJoinColumns = @JoinColumn(name = "modifier_id")
+    )
+    @Builder.Default
+    private Set<Modifier> modifiers = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -56,5 +72,9 @@ public class Meal {
                 this.variations.add(v);
             });
         }
+    }
+
+    public void setModifiers(Set<Modifier> modifiers) {
+        this.modifiers = modifiers == null ? new HashSet<>() : modifiers;
     }
 }

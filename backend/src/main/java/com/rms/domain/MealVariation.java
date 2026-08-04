@@ -1,5 +1,6 @@
 package com.rms.domain;
 
+import com.rms.domain.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,7 +26,12 @@ public class MealVariation {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(name = "price_adjustment", nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 10, scale = 2)
     @Builder.Default
-    private BigDecimal priceAdjustment = BigDecimal.ZERO;
+    private BigDecimal price = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private Status status = Status.ACTIVE;
 }

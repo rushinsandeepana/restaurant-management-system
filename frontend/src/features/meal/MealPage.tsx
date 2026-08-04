@@ -26,7 +26,7 @@ function formatDate(value: string) {
 function formatVariations(meal: Meal) {
   if (meal.variations.length === 0) return '—'
   return meal.variations
-    .map((v) => `${v.name} (+${formatPrice(v.priceAdjustment)})`)
+    .map((v) => `${v.name} (${formatPrice(v.price)})`)
     .join(', ')
 }
 
@@ -41,6 +41,7 @@ export function MealPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
+console.log("meals", meals);
 
   const loadMeals = useCallback(async () => {
     setLoading(true)
