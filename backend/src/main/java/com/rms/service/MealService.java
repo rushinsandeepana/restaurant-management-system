@@ -34,11 +34,25 @@ public class MealService {
     private final ModifierRepository modifierRepository;
     private final MealMapper mealMapper;
 
+    @SuppressWarnings("null")
     @Transactional(readOnly = true)
     public Page<MealResponse> findMeals(String search, Pageable pageable) {
+
         String term = search == null ? "" : search.trim();
-        return mealRepository.findAllWithSearch(term, pageable)
-                .map(mealMapper::toResponse);
+
+        Page<Meal> meals =
+                mealRepository.findAllWithSearch(term, pageable);
+
+        List<Long> mealIds = meals.getContent()
+                .stream()
+                .map(Meal::getId)
+                .toList();
+
+        if (!mealIds.isEmpty()) {
+            mealRepository.findMealsWithModifiers(mealIds);
+        }
+
+        return meals.map(mealMapper::toResponse);
     }
 
     @Transactional(readOnly = true)
@@ -66,6 +80,7 @@ public class MealService {
         return mealMapper.toResponse(mealRepository.save(meal));
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public MealResponse updateMeal(Long id, UpdateMealRequest request) {
         Meal meal = getOrThrow(id);
@@ -83,6 +98,7 @@ public class MealService {
         return mealMapper.toResponse(mealRepository.save(meal));
     }
 
+    @SuppressWarnings("null")
     @Transactional
     public void deleteMeal(Long id) {
         if (!mealRepository.existsById(id)) {
@@ -118,6 +134,7 @@ public class MealService {
         return modifiers;
     }
 
+    @SuppressWarnings("null")
     private Meal getOrThrow(Long id) {
         return mealRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Meal not found with id: " + id));
