@@ -21,4 +21,7 @@ export const mealsApi = {
 
   create: (body: CreateMealRequest) =>
     apiClient.post<Meal>('/api/meals', body).then((r) => r.data),
+  update: (id: number, body: CreateMealRequest) =>
+    apiClient.put<Meal>(`/api/meals/${id}`, body).then((r) => r.data),
+  delete: (id: number) => apiClient.delete<void>(`/api/meals/${id}`).then((r) => r.data),
 }

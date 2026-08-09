@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react'
 import { Status, STATUS_OPTIONS } from '@/types/enums'
 import type { Category, Modifier } from '@/types/category'
 import { cn } from '@/utils/cn'
+import type { Meal } from '@/types/meal'
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
@@ -78,11 +79,13 @@ interface AddMealModalProps {
   isOpen: boolean
   onClose: () => void
   onSuccess: () => void
+  initialMeal?: Meal | null
+  useMeal?: Meal[]
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) {
+export function AddMealModal({ isOpen, onClose, onSuccess, initialMeal }: AddMealModalProps) {
   const { t } = useTranslation()
 
   const [categories,  setCategories]  = useState<Category[]>([])
@@ -160,18 +163,55 @@ export function AddMealModal({ isOpen, onClose, onSuccess }: AddMealModalProps) 
     }
   }, [isOpen, reset])
 
+  useEffect(() => {
+    if (!isOpen) return
+
+    if (initialMeal) {
+      const timer = setTimeout(() => {
+        setValue('name', initialMeal.name)
+        setValue('categoryId', String(initialMeal.categoryId))
+        setValue('description', initialMeal.description)
+        setValue('status', initialMeal.status as MealFormData['status'])
+        setValue('imageUrl', initialMeal.imageUrl ?? '')
+        setValue(
+          'variations',
+          initialMeal.variations.map((variation) => ({
+            name: variation.name as VariationSize,
+            price: variation.price,
+            status: Status.ACTIVE,
+          }))
+        )
+        setValue('modifierIds', initialMeal.modifierIds)
+      }, 0)
+
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, initialMeal, setValue])
+
   const close = () => onClose()
 
   const onSubmit = async (data: MealFormData) => {
-    await mealsApi.create({
-      name:        data.name,
-      imageUrl:    data.imageUrl,
-      categoryId:  Number(data.categoryId),
-      status:      data.status,
-      description: data.description,
-      variations:  data.variations,
-      modifierIds: data.modifierIds,
-    })
+    if (initialMeal) {
+      await mealsApi.update(initialMeal.id, {
+        name:        data.name,
+        imageUrl:    data.imageUrl,
+        categoryId:  Number(data.categoryId),
+        status:      data.status,
+        description: data.description,
+        variations:  data.variations,
+        modifierIds: data.modifierIds,
+      })
+    } else {
+      await mealsApi.create({
+        name:        data.name,
+        imageUrl:    data.imageUrl,
+        categoryId:  Number(data.categoryId),
+        status:      data.status,
+        description: data.description,
+        variations:  data.variations,
+        modifierIds: data.modifierIds,
+      })
+    }
     onSuccess()
     onClose()
   }

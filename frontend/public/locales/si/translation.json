@@ -61,7 +61,8 @@
       "basePrice": "මූලික මිල",
       "totalPrice": "මුළු මිල",
       "createdAt": "සාදන ලද දිනය",
-      "status": "තත්ත්වය"
+      "status": "තත්ත්වය",
+      "updatedAt": "යාවත්කාලීන කළ දිනය"
     },
     "fields": {
       "name": "ආහාර වේල් නාමය",

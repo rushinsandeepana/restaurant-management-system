@@ -7,6 +7,7 @@ export interface MealVariation {
 export interface Meal {
   id: number
   name: string
+  description: string
   imageUrl: string | null
   categoryId: number
   status: string
@@ -15,6 +16,7 @@ export interface Meal {
   variations: MealVariation[]
   modifierIds: number[]
   createdAt: string
+  updatedAt: string
 }
 
 export interface MealVariationInput {

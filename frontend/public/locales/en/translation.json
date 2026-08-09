@@ -70,7 +70,9 @@
       "variations": "Variations",
       "basePrice": "Base price",
       "totalPrice": "Total price",
-      "createdAt": "Created"
+      "createdAt": "Created",
+      "updatedAt": "Updated",
+      "status": "Status"
     },
     "fields": {
       "name": "Meal name",

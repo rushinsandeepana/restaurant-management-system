@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 const PAGE_SIZE = 10
 
 function formatPrice(value: number) {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(value)
+  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'LKR' }).format(value)
 }
 
 function formatDate(value: string) {
@@ -21,13 +21,6 @@ function formatDate(value: string) {
     month: 'short',
     day: 'numeric',
   }).format(new Date(value))
-}
-
-function formatVariations(meal: Meal) {
-  if (meal.variations.length === 0) return '—'
-  return meal.variations
-    .map((v) => `${v.name} (${formatPrice(v.price)})`)
-    .join(', ')
 }
 
 export function MealPage() {
@@ -41,7 +34,8 @@ export function MealPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
-console.log("meals", meals);
+  const [expandedRowId, setExpandedRowId] = useState<string | number | null>(null)
+  const [editingMeal, setEditingMeal] = useState<Meal | null>(null)
 
   const loadMeals = useCallback(async () => {
     setLoading(true)
@@ -78,6 +72,29 @@ console.log("meals", meals);
     loadMeals()
   }
 
+  const handleEdit = (meal: Meal) => {
+    setEditingMeal(meal)
+    setModalOpen(true)
+  }
+
+  const handleDelete = async (meal: Meal) => {
+    const doDelete = async () => {
+      if (!confirm(t('meal.confirmDelete', { defaultValue: 'Are you sure you want to delete this modifier?' }))) return
+      try {
+        setLoading(true)
+        await mealsApi.delete(meal.id)
+        if (expandedRowId === meal.id) setExpandedRowId(null)
+        await loadMeals()
+      } catch (e) {
+        console.error('Failed to delete meal', e)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void doDelete()
+  }
+
   const columns: TableColumn<Meal>[] = [
     {
       header: t('meal.columns.image'),
@@ -108,15 +125,40 @@ console.log("meals", meals);
       header: t('meal.columns.variations'),
       key: 'variations',
       cell: (meal) => (
-        <span className="max-w-xs block text-gray-600 dark:text-gray-400">
-          {formatVariations(meal)}
-        </span>
+        <div className="flex flex-col gap-1 text-gray-600 dark:text-gray-400">
+          {meal.variations.length > 0 ? (
+            meal.variations.map((variation) => (
+              <span key={variation.id}>{variation.name}</span>
+            ))
+          ) : (
+            <span>—</span>
+          )}
+        </div>
       ),
     },
     {
       header: t('meal.columns.basePrice'),
       key: 'basePrice',
-      cell: (meal) => formatPrice(meal.basePrice),
+      cell: (meal) => (
+        <div className="flex flex-col gap-1">
+          {meal.variations.length > 0 ? (
+            meal.variations.map((variation) => (
+              <span key={variation.id}>{formatPrice(variation.price)}</span>
+            ))
+          ) : (
+            <span>{formatPrice(meal.basePrice)}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      header: t('meal.columns.status'),
+      key: 'status',
+      cell: (meal) => (
+        <span className="text-gray-600 dark:text-gray-400">
+          {meal.status}
+        </span>
+      ),
     },
     {
       header: t('meal.columns.createdAt'),
@@ -124,6 +166,15 @@ console.log("meals", meals);
       cell: (meal) => (
         <span className="text-gray-600 dark:text-gray-400">
           {formatDate(meal.createdAt)}
+        </span>
+      ),
+    },
+    {
+      header: t('meal.columns.updatedAt'),
+      key: 'updatedAt',
+      cell: (meal) => (
+        <span className="text-gray-600 dark:text-gray-400">
+          {formatDate(meal.updatedAt)}
         </span>
       ),
     },
@@ -169,13 +220,35 @@ console.log("meals", meals);
             totalElements,
             onPageChange: setPage,
           }}
+          expandedRowId={expandedRowId}
+          onExpandedRowIdChange={setExpandedRowId}
+          expandedRow={(table) => (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleEdit(table)}
+              >
+                {t('table.edit')}
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => handleDelete(table)}
+              >
+                {t('table.delete')}
+              </Button>
+            </div>
+          )}
         />
       </Card>
 
       <AddMealModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSuccess={handleMealAdded}
+        onClose={() => { setModalOpen(false); setEditingMeal(null) }}
+        onSuccess={() => { handleMealAdded(); setEditingMeal(null) }}
+        initialMeal={editingMeal}
+        useMeal={meals}
       />
     </PageWrapper>
   )
