@@ -2,6 +2,7 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { KitchenLayout } from '@/components/layout/KitchenLayout'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { CategoryPage } from '@/features/categories/CategoryPage'
+import { CreateOrderPage } from '@/features/orders/CreateOrder'
 import { DashboardPage } from '@/features/dashboard/DashboardPage'
 import { KitchenOrdersPage } from '@/features/kitchen/KitchenOrdersPage'
 import { MealPage } from '@/features/meal/MealPage'
@@ -61,6 +62,11 @@ export const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: 'orders/create',
+    element: <RoleRoute allowedRoles={['CASHIER']} loginPath="/login/cashier" />,
+    children: [{ index: true, element: <CreateOrderPage /> }],
   },
   {
     path: 'kitchen',

@@ -38,6 +38,9 @@ export function Topbar() {
         )}
       </div>
       <div className="flex items-center gap-2">
+        <Button variant='primary' size="sm" onClick={() => navigate('/orders/create')} >
+          <span className=''>+</span>POS
+        </Button>
         <div className="relative">
           <Globe className="pointer-events-none absolute start-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <select
